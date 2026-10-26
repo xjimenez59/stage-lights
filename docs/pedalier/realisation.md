@@ -4,7 +4,7 @@ Statut : **à construire** ; composants commandés (interrupteurs au pied, regis
 
 ## Décisions
 - **Un bloc posé au sol** : toute l'électronique est dans le boîtier, un seul câble USB vers le Pi.
-- Réalisation maison (perçage, soudure) ; 7 interrupteurs au pied à contact fugitif, 7 LED, 1 XIAO ESP32S3 possédée.
+- Réalisation maison (perçage, soudure) ; 7 interrupteurs au pied à contact fugitif **normalement ouverts** (confirmé par l'utilisateur, 2026-10-26), 7 LED, 1 XIAO ESP32S3 possédée.
 - LED pilotées par un registre à décalage **74HC595** (la carte n'a que 11 broches).
 
 ## Câblage (XIAO ESP32S3)
@@ -42,7 +42,7 @@ Un condensateur de 100 nF entre VCC et GND, près du 74HC595.
 
 ## Étapes
 1. **Banc d'essai** : monter la XIAO, le 74HC595 et une LED sur plaque d'essai ; téléverser le firmware ([firmware/pedalboard/](../../firmware/pedalboard/pedalboard.ino)). Le compiler : `arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32S3:CDCOnBoot=cdc firmware/pedalboard` (non essayé ; **à vérifier** : `Serial.setTxTimeoutMs`, reset à l'ouverture du port).
-2. **Polarité des interrupteurs** : mesurer au multimètre le contact au repos ; si normalement fermé, mettre `PRESSED_LEVEL` à `HIGH` dans le firmware (toutes les pédales de même polarité).
+2. **Polarité des interrupteurs** : normalement ouverts, donc `PRESSED_LEVEL = LOW` (valeur par défaut du firmware, rien à changer). Un contrôle au multimètre (ouvert au repos, fermé à l'appui) reste utile avant de souder.
 3. **Essai du protocole** depuis un PC, avec un terminal série : `WHO` répond `HELLO 1.0 7` ; un appui donne `BTN 1 1` puis `BTN 1 0` ; `LED 100000 0` allume la LED 1.
 4. **Montage final** dans le boîtier : percer, fixer les interrupteurs et les LED (ou boutons lumineux), souder sur plaque, fixer la carte.
 5. **Essai avec le contrôleur** sur le Pi : `--pedalboard auto`, étapes de la section 5 bis de [../plan-de-tests.md](../plan-de-tests.md).

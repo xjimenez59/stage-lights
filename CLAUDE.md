@@ -2,7 +2,7 @@
 
 Contexte pour l'assistant (extension Claude pour VS Code). Projet en français ; réponds en français.
 Étude de conception complète et historique : `docs/etude-conception.md` (version du 2026-10-23, **antérieure** à l'abandon de QLC+).
-Spécification du contrôleur maison : `docs/specification-controleur.md` (2026-10-26, en cours de validation ; le code n'est pas encore écrit).
+Spécification du contrôleur maison : `docs/specification-controleur.md` (2026-10-26) ; le code est écrit (`stage_control/`), testé hors matériel seulement.
 Les éléments marqués **(à vérifier)** ne sont pas validés sur matériel.
 
 ## Besoin
@@ -39,7 +39,8 @@ Brochage XLR : 1 = GND/blindage, 2 = D− (B), 3 = D+ (A). Sans réponse des pro
 - `config/` : `ola-uartdmx.conf`, extraits `config.txt` / `cmdline.txt`.
 - `scripts/` : `install-pi.sh`, `deploy.sh` (rsync vers le Pi), unités systemd.
 - `network/` : réglages de l'Opal, serveur « faux internet ».
-- `docs/` : câblage, plan de tests matériel, étude complète.
+- `stage_control/` : contrôleur maison ; `firmware/` : firmware du pédalier ; `profiles/` : modèles de projecteurs.
+- `docs/` : spécification, câblage, plan de tests matériel, étude complète ; `docs/pedalier/` : documentation du pédalier, séparée de celle du contrôleur.
 
 ## Chaîne logicielle : deux voies pour sortir le DMX (à comparer sur matériel)
 1. **OLA `uartdmx`** : contrôleur → OLA → olad → `/dev/ttyAMA0`. Simple mais timing logiciel (break par ioctl) ; scintillement possible sous charge.

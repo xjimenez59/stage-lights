@@ -35,6 +35,7 @@ Dans les deux cas, le schéma de [schema.svg](schema.svg) reste valable : un con
 - Surface d'appui et espacement : on doit viser **sans regarder**, à l'aveugle, avec 7 pédales.
 
 ## Décisions (2026-10-26)
+- Les interrupteurs commandés sont **normalement ouverts** : câblage direct vers GND, aucun changement du firmware.
 - **Un bloc posé au sol**, réalisé par l'utilisateur (perçage, soudure) ; interrupteurs au pied et registres à décalage commandés. Suite : [realisation.md](realisation.md).
 - Budget et nombre de pédales : 7 (6 emplacements + blackout), pas de budget séparé précisé.
 
