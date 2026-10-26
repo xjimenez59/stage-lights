@@ -1,13 +1,11 @@
 # Pédalier : réalisation (boîtier au sol)
 
-Statut : **à construire** ; interrupteurs au pied commandés, le reste à réunir. Rien ici n'a été essayé sur le matériel (à vérifier). Interface avec le contrôleur : [protocole.md](protocole.md). Schéma : [schema.svg](schema.svg) (à ouvrir dans un navigateur).
+Statut : **à construire** ; rien n'a été essayé sur le matériel (à vérifier). Interface avec le contrôleur : [protocole.md](protocole.md). Schéma : [schema.svg](schema.svg). Choix des composants, fournisseurs et prix : [../materiel.md](../materiel.md), section 7.
 
-## Décisions
-- **Un bloc posé au sol** : toute l'électronique est dans le boîtier, un seul câble USB vers le Pi.
-- Réalisation maison (perçage, soudure) ; 7 interrupteurs au pied à contact fugitif **normalement ouverts** (confirmé par l'utilisateur, 2026-10-26), 7 LED.
-- **Carte : LOLIN D32** (ESP32, mini-USB, connecteur de batterie ; l'utilisateur en possède deux, dont une de rechange). Elle a assez de broches pour relier les 14 fils directement : **pas de registre à décalage**. Les registres 74HC595 commandés restent en réserve (voir la variante XIAO plus bas).
+## Principe
+Un bloc posé au sol : toute l'électronique est dans le boîtier, un seul câble USB vers le boîtier du Pi. 7 interrupteurs au pied à contact fugitif **normalement ouverts**, 7 LED, une carte **LOLIN D32** (ESP32) qui a assez de GPIO pour tout câbler directement.
 
-## Câblage (LOLIN D32)
+## Câblage
 Numéros de **GPIO** de l'ESP32 (**à vérifier** sur la sérigraphie de la carte).
 
 | Fonction | GPIO | Branchement |
@@ -22,26 +20,20 @@ Broches **évitées** : 0, 2, 5, 12, 15 (configuration au démarrage ; le 5 port
 ## Liste de matériel
 | Quantité | Pièce | Remarque |
 |---|---|---|
-| 1 | LOLIN D32 | possédée (2 exemplaires) |
-| 7 | interrupteurs au pied, **contact fugitif normalement ouvert** | commandés |
+| 1 | LOLIN D32 | une seconde en rechange |
+| 7 | interrupteurs au pied, contact fugitif normalement ouvert | |
 | 7 | LED 3 ou 5 mm (la 7 rouge) | à 3,3 V avec 330 Ω : environ 4 mA chacune |
 | 7 | résistances 330 Ω | |
-| 1 | boîtier métal | assez solide pour être piétiné ; si besoin, plaque de protection |
-| 1 | cordon micro/mini-USB de qualité | vers le Pi ; décharge de traction dans le boîtier |
-| — | fil, plaque à pastilles ou barrettes | |
-
-## Étapes
-1. **Banc d'essai** : monter la D32 et une LED sur plaque d'essai ; téléverser le firmware ([firmware/pedalboard/](../../firmware/pedalboard/pedalboard.ino)). Le compiler : `arduino-cli compile --fqbn esp32:esp32:d32 firmware/pedalboard` (non essayé ; **à vérifier** : nom de la carte, pilote USB-série sous Windows).
-2. **Polarité des interrupteurs** : normalement ouverts, donc `PRESSED_LEVEL = LOW` (valeur par défaut du firmware, rien à changer). Un contrôle au multimètre (ouvert au repos, fermé à l'appui) reste utile avant de souder.
-3. **Essai du protocole** depuis un PC, avec un terminal série : `WHO` répond `HELLO 1.0 7` ; un appui donne `BTN 1 1` puis `BTN 1 0` ; `LED 100000 0` allume la LED 1.
-4. **Montage final** dans le boîtier : percer, fixer les interrupteurs et les LED (ou boutons lumineux), câbler la carte, la fixer (le connecteur USB doit rester accessible).
-5. **Essai avec le contrôleur** sur le Pi : `--pedalboard auto`, étapes de la section 5 bis de [../plan-de-tests.md](../plan-de-tests.md).
+| 1 | boîtier métal | assez solide pour être piétiné ; plaque de protection si besoin |
+| 1 | prise USB-C à fixer sur panneau, reliée à la carte | avec 5,1 kΩ sur CC1 et CC2 ; voir [../materiel.md](../materiel.md) |
+| 1 | câble USB-A vers USB-C de quelques mètres | vers le Pi |
 
 ## Liaison USB (à vérifier)
-La D32 passe par une puce USB-série : sur le Pi, la carte apparaît en `/dev/ttyUSB0` (le contrôleur, avec `--pedalboard auto`, cherche aussi `/dev/ttyUSB*`). Ouvrir le port peut **redémarrer** la carte (lignes DTR/RTS) : le contrôleur retrouve alors la liaison seul, mais à contrôler.
+La D32 passe par une puce USB-série : sur le Pi, la carte apparaît en `/dev/ttyUSB0` (`--pedalboard auto` cherche aussi `/dev/ttyACM*`). Ouvrir le port peut **redémarrer** la carte (lignes DTR/RTS) : le contrôleur retrouve alors la liaison seul, mais à contrôler.
 
-## Variantes
-- **XIAO ESP32S3 + 74HC595** (11 broches seulement, LED via registre à décalage, USB natif) : abandonnée pour la D32 ; le schéma et le firmware correspondants sont dans l'historique git (commit `51990a9`).
-- Boutons « arcade » lumineux (LED intégrée) : transistor si la LED est prévue pour 5 ou 12 V ; plaque de protection contre les talons.
-- Pédales de sustain du commerce sur prises jack : voir [choix-pedales.md](choix-pedales.md).
-- Pads MIDI à LED : voir [protocole.md](protocole.md).
+## Étapes
+1. **Banc d'essai** : monter la D32 et une LED sur plaque d'essai ; compiler et téléverser le firmware ([firmware/pedalboard/](../../firmware/pedalboard/pedalboard.ino)) : `arduino-cli compile --fqbn esp32:esp32:d32 firmware/pedalboard` (non essayé).
+2. **Interrupteurs** : normalement ouverts, donc `PRESSED_LEVEL = LOW` (défaut du firmware). Contrôle au multimètre avant de souder.
+3. **Essai du protocole** depuis un PC avec un terminal série : `WHO` répond `HELLO 1.0 7` ; un appui donne `BTN 1 1` puis `BTN 1 0` ; `LED 100000 0` allume la LED 1.
+4. **Montage final** : percer, fixer interrupteurs, LED et prise USB-C, câbler, fixer la carte.
+5. **Essai avec le contrôleur** sur le Pi : `--pedalboard auto`, section 5 bis de [../plan-de-tests.md](../plan-de-tests.md).

@@ -1,14 +1,11 @@
-# Spécification : contrôleur d'éclairage (remplace QLC+)
+# Spécification : contrôleur d'éclairage
 
-Statut : **spécification validée dans ses grandes lignes** (2026-10-26). Étapes 1 à 3 du plan (§11) écrites et testées hors matériel ; rien n'est validé sur le Pi ni sur les projecteurs.
+Statut : écrit et testé hors matériel (voir §11) ; rien n'est validé sur le Pi ni sur les projecteurs.
 Les éléments marqués **(à vérifier)** ne sont pas validés sur matériel ou sur la documentation officielle.
 
 ## 1. Objectif et décision d'architecture
 
-Remplacer QLC+ par un contrôleur maison, léger, qui est le **seul** producteur de l'univers DMX.
-Motifs : le besoin se limite à quelques projecteurs, des scènes avec fondu, une interface tactile avec choix de couleur « au doigt » et un pédalier ; QLC+ n'offre pas de roue de couleur dans sa console virtuelle et sa console ne se construit pas depuis l'interface web.
-
-Ce qu'on abandonne de QLC+ : chasers avancés, matrices RGB, EFX, Show, scripts, plugins d'entrée (MIDI...), bibliothèque de fixtures. Aucun n'est nécessaire pour la première version.
+Un contrôleur léger, **seul** producteur de l'univers DMX. Le besoin : quelques projecteurs, des scènes avec fondu, une interface tactile avec choix de couleur « au doigt » et un pédalier.
 
 Risque assumé : un logiciel neuf à fiabiliser pour l'usage en concert. Repli : la sortie DMX reste interchangeable (voir §3).
 
@@ -21,7 +18,7 @@ Inclus :
 - Interface web tactile : choix de projecteurs, roue de couleur, palette de pastilles, sliders, enregistrement et rappel de scènes, intensité générale.
 - Pédalier maison USB avec une LED par pédale.
 
-Hors v1 (à ne pas empêcher) : règles pilotées par la XR18 (OSC : « qui chante »), projecteurs à mouvement (lyre, pan/tilt et calibration), liaison Bluetooth des pédales (test possible sur les Raspberry Pi 3), import de fichiers `.qxf` de QLC+ (licence et format à vérifier).
+Hors v1 (à ne pas empêcher) : règles pilotées par la XR18 (OSC : « qui chante »), projecteurs à mouvement (lyre, pan/tilt et calibration), liaison Bluetooth des pédales.
 
 ## 3. Architecture
 
@@ -34,8 +31,8 @@ Pédalier USB (série) ───────────────────
                                    Art-Net (UDP localhost) ─> spi_dmx ─> SPI0 ─> RS485 ─> XLR
 ```
 
-- Le contrôleur émet de l'ArtDmx vers `spi_dmx` (déjà présent dans le dépôt), qui maintient la trame DMX côté matériel. Le port 6454 n'est plus partagé avec QLC+, donc le risque de conflit signalé dans CLAUDE.md disparaît.
-- Sorties de repli à garder possibles derrière une petite interface « sink » : OLA `uartdmx`, adaptateur USB-RS485 FT232 (voir CLAUDE.md).
+- Le contrôleur émet de l'ArtDmx vers `spi_dmx` (déjà présent dans le dépôt), qui maintient la trame DMX côté matériel.
+- Sorties de repli à garder possibles derrière une petite interface « sink » : OLA `uartdmx`, adaptateur USB-RS485 FT232 (voir [sortie-dmx.md](sortie-dmx.md)).
 - Un seul processus, plusieurs threads (HTTP/WebSocket, série pédalier, boucle d'émission). Stdlib uniquement, comme le reste du dépôt. **Décision : Server-Sent Events** pour les notifications Pi vers tablette (état des scènes, blackout, pédalier), et requêtes HTTP ordinaires pour les commandes (le WebSocket n'est pas dans la stdlib).
 - Service systemd, démarrage automatique, état persistant dans un répertoire de données (voir §8).
 
@@ -77,7 +74,7 @@ Actions écartées : « scène suivante / précédente » hors séquence (doublo
 Le 7ᵉ bouton du pédalier est **figé en blackout** (pédale de sécurité toujours au même endroit) ; les 6 autres sont configurables.
 
 ### 4.6 Séquence
-Un enchaînement de scènes s'appelle une **séquence** (chaser ou chenillard dans QLC+, *cue list* sur les consoles lumière ; chaque scène de la liste est une *étape* ou *cue*). Modèle volontairement minimal :
+Un enchaînement de scènes s'appelle une **séquence** (*chaser* ou *cue list* ; chaque scène de la liste est une *étape*). Modèle volontairement minimal :
 - liste ordonnée d'étapes ; chaque étape : une scène, un temps de fondu, et une **condition de passage** à l'étape suivante, qui est soit un **délai** (secondes) soit une **action manuelle** (pédale « étape suivante ») ;
 - réglage par séquence de la **fin** : *s'arrête* sur la dernière scène (défaut) ou *boucle* ;
 - pas d'aller-retour, d'aléatoire ni de vitesse variable en v1.
@@ -140,16 +137,17 @@ Protocole complet, câblage et liste de matériel : [pedalier/protocole.md](peda
 
 ## 10. Décisions prises et point ouvert
 
-Décisions : QLC+ abandonné (raisons dans `CLAUDE.md`) ; Server-Sent Events pour les notifications vers la tablette ; fondu en courbe en S ; blackout figé sur la 7ᵉ pédale et qui masque aussi le flash ; démarrage en blackout ; un projecteur absent d'une scène reste tel quel ; séquences en v1 (délai ou manuel, boucle ou arrêt) ; pédalier maison sur XIAO ESP32S3 en USB série ; mode 6 canaux pour les PARty Spot ; mode musique des PARty Spot non utilisé.
+Décisions : Server-Sent Events pour les notifications vers la tablette ; fondu en courbe en S ; blackout figé sur la 7ᵉ pédale et qui masque aussi le flash ; démarrage en blackout ; un projecteur absent d'une scène reste tel quel ; séquences en v1 (délai ou manuel, boucle ou arrêt) ; pédalier maison sur LOLIN D32 en USB série ; mode 6 canaux pour les PARty Spot ; mode musique des PARty Spot non utilisé.
 
-Point ouvert : format exact du message `LED` (masque de 6 bits + blackout), à fixer avant le firmware.
-
-## 11. Plan de réalisation et avancement
-
-1. ✔ Modèle de données, profils, validation, traduction couleur vers canaux, stroboscope (`stage_control/profile.py`, `plan.py`, `scene.py`, `render.py`).
-2. ✔ Moteur de scènes, fondus, blackout, flash, séquences (`engine.py`, `sequence.py`), tests avec horloge simulée.
-3. ✔ Émetteur ArtDmx vers `spi_dmx` (`output.py`), test de bout en bout contre le récepteur de `spi_dmx`.
-4. ✔ Persistance JSON : écriture atomique, `.bak`, repli sur la copie en cas de fichier corrompu (`store.py`).
-5. ✔ Serveur HTTP + SSE (`controller.py`, `server.py`, `__main__.py` ; API décrite en tête de `server.py`). Interface web tactile ✔ (`stage_control/web/`, 4 onglets : Jeu, Couleurs, Séquences, Réglages ; essayée dans Edge, à essayer sur la tablette Android).
-6. Module d'entrées et protocole série du pédalier (simulateur logiciel, puis firmware).
-7. Tests matériel : suite de `docs/plan-de-tests.md` (à compléter par une section « contrôleur »).
+## 11. Avancement
+| Brique | État |
+|---|---|
+| Modèle de données, profils, validation, traduction couleur → canaux (`profile.py`, `plan.py`, `scene.py`, `render.py`) | écrit, testé |
+| Moteur : scènes, fondus, blackout, flash, séquences (`engine.py`, `sequence.py`) | écrit, testé avec horloge simulée |
+| Émetteur ArtDmx vers `spi_dmx` (`output.py`) | écrit, testé de bout en bout en local |
+| Persistance JSON : écriture atomique, `.bak`, repli sur la copie (`store.py`) | écrit, testé |
+| Serveur HTTP + SSE (`controller.py`, `server.py`, `__main__.py` ; API décrite en tête de `server.py`) | écrit, testé |
+| Interface web tactile (`stage_control/web/` : Jeu, Scènes, Séquences, Projecteurs, Réglages) | essayée dans Edge ; à essayer sur la tablette Android |
+| Liaison pédalier côté Pi (`pedalboard.py`) et simulateur | écrit, testé avec un faux pédalier |
+| Firmware du pédalier | non compilé |
+| Tests sur matériel | voir [plan-de-tests.md](plan-de-tests.md) |

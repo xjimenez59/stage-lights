@@ -5,9 +5,10 @@ Valeurs par défaut courantes : IP 192.168.8.1, interface `http://192.168.8.1` (
 ## À faire
 1. Définir le mot de passe administrateur ; mettre le firmware à jour.
 2. WiFi : SSID dédié scène, WPA2/WPA3 selon compatibilité des appareils ; **5 GHz** avec canal fixe (éviter DFS si la salle est chargée) ; 2,4 GHz éventuellement avec un autre SSID ou désactivé.
-3. Réseau : convertir le port **WAN en LAN** (option de l'interface) afin d'avoir 3 ports pour XR18, Pi et service **(à vérifier dans l'interface)**.
+3. Réseau : convertir le port **WAN en LAN** afin d'avoir 3 ports pour XR18, Pi et service. Laisser le WAN débranché, ouvrir le panneau d'administration ; firmware 4.7 et plus récent : INTERNET → Ethernet → roue dentée (Port Management) → LAN → Apply ; firmware 4.6 et antérieur : INTERNET → Ethernet → « Change to LAN ». Se reconnecter ensuite ; retour possible depuis Port Management, ou bouton RESET 4 secondes. L'option est documentée surtout pour le mode répéteur : **à valider sur l'Opal en mode routeur**.
 4. DHCP : réservations d'adresses, par exemple Pi `192.168.8.10`, XR18 `192.168.8.20`.
 5. Mode de fonctionnement : routeur sans WAN (aucune sortie internet).
+6. Antennes non déportables : routeur hors d'un boîtier métallique (boîtier plastique, ou routeur à l'extérieur relié en Ethernet). Mesurer le signal aux positions de jeu avec une application d'analyse WiFi ; garder le 2,4 GHz en secours (le 5 GHz est plus sensible à l'absorption par le public).
 
 ## Faux internet (optionnel)
 But : éviter que la tablette ou les téléphones ne quittent le WiFi parce qu'il n'a « pas d'internet ».

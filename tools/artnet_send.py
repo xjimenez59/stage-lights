@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Envoie des paquets ArtDmx de test (sans QLC+).
+"""Envoie des paquets ArtDmx de test (sans contrôleur).
 
 Exemples ::
 

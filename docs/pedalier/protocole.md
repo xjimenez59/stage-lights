@@ -1,6 +1,6 @@
 # Pédalier : protocole entre le Pi et le pédalier
 
-Statut : côté Pi (`stage_control/pedalboard.py`) écrit et testé avec un faux pédalier ; **firmware non compilé, non essayé** (à vérifier). Ce document décrit seulement l'**interface** entre le contrôleur et le pédalier ; la fabrication du boîtier est dans [realisation.md](realisation.md), le choix des pédales dans [choix-pedales.md](choix-pedales.md).
+Statut : côté Pi (`stage_control/pedalboard.py`) écrit et testé avec un faux pédalier ; **firmware non compilé, non essayé** (à vérifier). Ce document décrit seulement l'**interface** entre le contrôleur et le pédalier ; la fabrication du boîtier est dans [realisation.md](realisation.md), le matériel dans [../materiel.md](../materiel.md).
 
 ## Rôle
 Sept pédales (6 emplacements configurables + blackout) avec une LED chacune. Le Pi décide de l'action de chaque pédale (réglage « Pédales » de l'interface) et dit au pédalier quelles LED allumer. Le pédalier ne connaît ni les scènes ni les séquences : il envoie des appuis et affiche des LED.
@@ -46,7 +46,7 @@ Le Pi envoie `LED` à chaque changement d'état et à chaque (re)connexion.
 - `tests/test_pedalboard.py` : un faux pédalier TCP joue le protocole (connexion, boutons, LED, perte de liaison, silence, mauvais appareil, lignes invalides).
 - `tools/pedalboard_sim.py` : simulateur interactif. Lancer le simulateur, puis `python3 -m stage_control --pedalboard tcp:127.0.0.1:7000` ; taper `4` pour une pédale, `d 4` / `u 4` pour un flash maintenu.
 
-## Variante : pads MIDI à LED
+## Variante envisagée : pads MIDI à LED
 Des **pads** (petits contrôleurs MIDI USB avec LED, de type Launchpad, APC mini, etc.) peuvent jouer le même rôle que le pédalier : l'architecture « entrée → action + retour d'état » s'y prête. Ce qu'il faudrait :
 - lire les notes MIDI (un pad = une note ; note on = appui, note off = relâchement) ; sous Linux, les pads « class-compliant » apparaissent comme des fichiers `/dev/snd/midiC*D*` lisibles sans bibliothèque ;
 - renvoyer les LED : le message dépend du modèle (souvent une note avec une vélocité qui sert de code couleur) ; certains pads permettraient même d'afficher la **couleur de la scène** sur son pad ;
