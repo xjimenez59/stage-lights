@@ -113,8 +113,8 @@ Mise en page tactile, grandes cibles, sans aucune ressource externe (le boîtier
 
 Protocole complet, câblage et liste de matériel : [pedalier/protocole.md](pedalier/protocole.md) (interface) et [pedalier/realisation.md](pedalier/realisation.md) (matériel).
 
-- Carte : Seeed Studio XIAO ESP32S3 (déjà possédées ; USB natif **et** radio disponible pour un essai BLE ultérieur). 7 pédales (6 emplacements + blackout) et 7 LED ; comme la carte n'a que 11 broches, les LED passent par un registre à décalage 74HC595 (3 broches). Brochage, gestion des broches de démarrage et firmware : **à vérifier sur le matériel**.
-- Liaison **série USB** (CDC) vers le Pi, protocole texte, une ligne par message :
+- Carte : LOLIN D32 (ESP32, possédée en deux exemplaires) ; 7 pédales (6 emplacements + blackout) et 7 LED câblées directement sur des GPIO (détail dans [pedalier/realisation.md](pedalier/realisation.md)).
+- Liaison **série USB** (puce USB-série de la carte, `/dev/ttyUSB0`) vers le Pi, protocole texte, une ligne par message :
   - pédalier → Pi : `BTN <n> <1|0>` (n = 1 à 7 ; 1 = appui, 0 = relâchement, nécessaire pour le flash ; 7 = blackout), `HELLO <version> <nb de pédales>`, `PONG` ;
   - Pi → pédalier : `WHO`, `PING` (toutes les 2 s), `LED <6 chiffres> <b>` : un chiffre 0/1 par emplacement puis la LED du blackout, par exemple `LED 010010 1`. Envoyé à chaque changement d'état et à chaque (re)connexion.
 - Règles de LED : un emplacement « scène » est allumé quand sa scène est active **et qu'aucune séquence ne tourne** ; « séquence » : pendant sa lecture ; « flash » : pendant l'appui ; « étape suivante / précédente » : jamais. La LED du blackout est allumée pendant le blackout, et la LED de la scène active reste allumée.

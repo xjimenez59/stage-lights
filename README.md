@@ -25,7 +25,7 @@ Boîtier de scène pour Raspberry Pi 2 B : contrôleur d'éclairage maison (scè
 | Brique | État |
 |---|---|
 | Liaison série côté Pi (`stage_control/pedalboard.py`), protocole, simulateur | écrit, testé avec un faux pédalier |
-| Firmware XIAO ESP32S3 (`firmware/pedalboard/`) | écrit, **non compilé ni essayé** |
+| Firmware LOLIN D32 (ESP32) (`firmware/pedalboard/`) | écrit, **non compilé ni essayé** |
 | Câblage, boîtier | schéma fait ; composants commandés, **à construire** |
 
 **Rien n'est validé sur le Pi, sur un analyseur logique ni sur les projecteurs** : voir les points à vérifier dans `CLAUDE.md` et le plan de tests.
@@ -65,7 +65,7 @@ Essai matériel : `python3 -m spi_dmx --test-pattern --channels 32` puis analyse
 CLAUDE.md          contexte pour l'assistant
 spi_dmx/           démon Art-Net → SPI → DMX512
 stage_control/     contrôleur : profils, scènes, moteur, séquences, sortie Art-Net, pédalier, interface web
-firmware/          pédalier : firmware (Arduino, XIAO ESP32S3)
+firmware/          pédalier : firmware (Arduino, LOLIN D32)
 profiles/          profils de projecteurs (JSON)
 tools/             outils de test
 tests/             tests unitaires

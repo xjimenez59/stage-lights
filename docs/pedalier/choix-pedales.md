@@ -20,7 +20,7 @@ Statut : **exploration**, rien n'est acheté ni essayé. Les prix sont des ordre
 | **Contrôleurs MIDI à pied tout faits** | Behringer FCB1010 (10 pédales, MIDI DIN seulement), M-Vave Chocolate (4 pédales, Bluetooth), Morningstar | Pratiques, déjà au sol | **Les LED ne se pilotent pas depuis le Pi** pour la plupart (la FCB1010 allume ses LED toute seule), ou sont hors budget ; certains modèles sont vendus surtout sur AliExpress | 30 à 300 € |
 
 ## Ce que je recommande d'étudier en premier
-1. **Un boîtier unique, au sol, avec l'électronique dedans** (XIAO + 74HC595) et des commutateurs montés sur le dessus. C'est la solution la plus fiable en scène (une seule liaison USB, rien à rebrancher) et la moins chère. Deux sous-variantes :
+1. **Un boîtier unique, au sol, avec l'électronique dedans** (carte ESP32 + LED en liaison directe) et des commutateurs montés sur le dessus. C'est la solution la plus fiable en scène (une seule liaison USB, rien à rebrancher) et la moins chère. Deux sous-variantes :
    - **Commutateurs de pédale d'effets** (momentanés) + 7 LED de panneau : le moins cher (environ 60 à 90 € de pièces et de boîtier **(à vérifier)**), le plus à bricoler ;
    - **Gros boutons arcade lumineux** : le plus simple à câbler (LED dans le bouton), à protéger contre les coups de talon.
 2. **Un boîtier à 7 prises jack 6,35 mm** (entrées) + 7 LED sur le dessus, où l'on branche des **pédales de sustain** du commerce : on choisit ses pédales (et on les remplace sur scène), mais c'est la solution la plus chère (7 pédales à 15–40 €) et elle fait un faisceau de câbles. À réserver si l'on veut poser les pédales ailleurs qu'au même endroit.

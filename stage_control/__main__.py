@@ -34,7 +34,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--dmx-host", default="127.0.0.1", help="hôte du démon spi_dmx (Art-Net)")
     p.add_argument("--dmx-port", type=int, default=6454, help="port Art-Net du démon spi_dmx")
     p.add_argument("--pedalboard", default="", metavar="PORT",
-                   help="pédalier USB : « auto » (ports /dev/ttyACM*), un chemin (/dev/ttyACM0) ou tcp:hôte:port "
+                   help="pédalier USB : « auto » (ports /dev/ttyACM* et /dev/ttyUSB*), un chemin (/dev/ttyACM0) ou tcp:hôte:port "
                         "(simulateur) ; vide = pas de pédalier")
     p.add_argument("--no-output", action="store_true", help="ne rien envoyer en Art-Net (essai de l'interface)")
     p.add_argument("-v", "--verbose", action="store_true")

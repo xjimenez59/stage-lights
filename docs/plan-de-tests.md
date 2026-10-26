@@ -42,9 +42,9 @@ Cocher au fur et à mesure et noter les mesures dans ce fichier.
 - [ ] Mesure de la cadence réelle de la boucle d'émission (gigue) pendant l'usage de l'interface.
 
 ## 5 bis. Pédalier
-- [ ] Compiler et téléverser `firmware/pedalboard` sur le XIAO ESP32S3 (`arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32S3:CDCOnBoot=cdc firmware/pedalboard`) ; vérifier que `Serial.setTxTimeoutMs` existe dans la version du cœur ESP32 utilisée.
-- [ ] Câblage de `docs/pedalier/realisation.md` : les 7 LED s'allument une à une (essai du 74HC595) ; sans liaison, elles clignotent toutes lentement.
-- [ ] Brancher au Pi : `ls /dev/ttyACM*` ; `journalctl -u stage-control` indique « pédalier connecté » ; l'interface affiche « Pédalier » en vert. Vérifier que l'ouverture du port ne redémarre pas la carte (DTR/RTS).
+- [ ] Compiler et téléverser `firmware/pedalboard` sur la LOLIN D32 (`arduino-cli compile --fqbn esp32:esp32:d32 firmware/pedalboard`)  (nom de carte et pilote USB-série à vérifier).
+- [ ] Câblage de `docs/pedalier/realisation.md` : les 7 LED s'allument une à une  ; sans liaison, elles clignotent toutes lentement.
+- [ ] Brancher au Pi : `ls /dev/ttyUSB* /dev/ttyACM*` ; `journalctl -u stage-control` indique « pédalier connecté » ; l'interface affiche « Pédalier » en vert. Vérifier que l'ouverture du port ne redémarre pas la carte (DTR/RTS).
 - [ ] Chaque pédale : l'appui déclenche l'action choisie dans « Réglages » ; la LED de la scène suit ; pendant une séquence, seule la LED de la séquence est allumée.
 - [ ] Flash : maintenu = actif, relâché = rétabli ; débrancher le câble en maintenant : le flash se relâche tout seul.
 - [ ] Antirebond : appuyer vite et plusieurs fois sur chaque pédale, sans doublon ni appui manqué ; mesurer le délai pédale → lumière (cible : imperceptible).

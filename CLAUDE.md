@@ -15,7 +15,7 @@ Secteur → alim(s) 5 V
                                                                       └─ Raspberry Pi 2 B (contrôleur maison, web)
 Pi 2 B ── contrôleur (Art-Net localhost) ── SPI0 MOSI (démon spi_dmx de ce dépôt)  ou  UART (/dev/ttyAMA0 via OLA uartdmx)
        ── Waveshare TTL To RS485 (C) isolé (sens automatique, sans DE/RE) ── XLR3 femelle châssis ── projecteurs
-Pi 2 B ── USB série ── pédalier maison (XIAO ESP32S3 : 6 emplacements de scène + blackout, 7 LED)
+Pi 2 B ── USB série ── pédalier maison (LOLIN D32 : 6 emplacements de scène + blackout, 7 LED)
 Tablette Android ── WiFi ── Mixing Station + navigateur (interface du contrôleur : roue de couleur, scènes)
 ```
 Brochage XLR : 1 = GND/blindage, 2 = D− (B), 3 = D+ (A). Sans réponse des projecteurs : inverser 2 et 3.

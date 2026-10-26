@@ -46,7 +46,7 @@ class Transport:
 
 
 class SerialTransport(Transport):
-    """Port série USB (CDC) ouvert en mode brut avec ``termios`` (bibliothèque standard, Linux)."""
+    """Port série USB (puce USB-série ou CDC) ouvert en mode brut avec ``termios`` (bibliothèque standard, Linux)."""
 
     def __init__(self, path: str):
         import termios
@@ -57,6 +57,7 @@ class SerialTransport(Transport):
             tty.setraw(self.fd)
             attrs = termios.tcgetattr(self.fd)
             attrs[2] &= ~termios.HUPCL  # ne pas baisser DTR à la fermeture
+            attrs[4] = attrs[5] = termios.B115200  # sans effet sur l'USB natif, requis avec une puce USB-série
             termios.tcsetattr(self.fd, termios.TCSANOW, attrs)
         except Exception:
             os.close(self.fd)
@@ -129,9 +130,9 @@ def open_transport(target: str) -> Transport:
 
 
 def resolve_targets(spec: str) -> List[str]:
-    """``auto`` : les ports ``/dev/ttyACM*`` présents ; sinon le chemin (ou ``tcp:hôte:port``) donné."""
+    """``auto`` : les ports ``/dev/ttyACM*`` et ``/dev/ttyUSB*`` présents ; sinon le chemin (ou ``tcp:hôte:port``) donné."""
     if spec == "auto":
-        return sorted(glob.glob("/dev/ttyACM*"))
+        return sorted(glob.glob("/dev/ttyACM*") + glob.glob("/dev/ttyUSB*"))
     return [spec]
 
 

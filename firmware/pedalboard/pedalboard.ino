@@ -1,20 +1,19 @@
-// Pédalier de scène : Seeed Studio XIAO ESP32S3, 7 pédales, 7 LED.
+// Pédalier de scène : LOLIN D32 (ESP32), 7 pédales, 7 LED.  Liaison USB via la puce série de la carte.
 // Protocole : docs/pedalier/protocole.md. NON COMPILÉ ni essayé sur le matériel (à vérifier).
 //
 // Câblage :
-//   pédales  : D0..D6 -> interrupteur -> GND (résistance de rappel interne)
-//   LED      : 74HC595 (alimenté en 3,3 V) : D8 = DS (données), D9 = SHCP (horloge), D10 = STCP (verrou),
-//              /OE à GND, /MR à 3,3 V ; sorties Q0..Q6 -> résistance 330 ohms -> LED -> GND
+//   pédales  : GPIO 13,14,16,17,18,19,23 -> interrupteur -> GND (résistance de rappel interne)
+//   LED      : GPIO 21,22,25,26,27,32,33 -> résistance 330 ohms -> LED -> GND
 //   pédales 1 à 6 = emplacements du boîtier, pédale 7 = blackout
 //
-// Carte Arduino : « XIAO_ESP32S3 », option « USB CDC On Boot : Enabled ».
+// Carte Arduino : « LOLIN D32 » (esp32:esp32:d32). Broches GPIO à vérifier sur la carte (voir docs/pedalier/realisation.md).
 
 #include <Arduino.h>
 
 static const char *VERSION = "1.0";
 static const uint8_t N = 7;
-static const uint8_t BTN_PIN[N] = {D0, D1, D2, D3, D4, D5, D6};
-static const uint8_t PIN_DATA = D8, PIN_CLK = D9, PIN_LATCH = D10;
+static const uint8_t BTN_PIN[N] = {13, 14, 16, 17, 18, 19, 23};
+static const uint8_t LED_PIN[N] = {21, 22, 25, 26, 27, 32, 33};
 // Niveau lu quand la pédale est enfoncée : LOW pour un contact normalement ouvert (câblé vers GND).
 // Pour une pédale « normalement fermée » (certaines pédales de sustain), mettre HIGH.
 static const uint8_t PRESSED_LEVEL = LOW;
@@ -32,9 +31,7 @@ static char line[48];
 static uint8_t lineLen = 0;
 
 static void writeLeds(uint8_t mask) {
-  digitalWrite(PIN_LATCH, LOW);
-  shiftOut(PIN_DATA, PIN_CLK, MSBFIRST, mask);
-  digitalWrite(PIN_LATCH, HIGH);
+  for (uint8_t i = 0; i < N; i++) digitalWrite(LED_PIN[i], (mask >> i) & 1);
 }
 
 static void hello() {
@@ -97,12 +94,9 @@ static void scanButtons() {
 }
 
 void setup() {
-  Serial.begin(115200);  // sans effet sur l'USB natif
-  Serial.setTxTimeoutMs(0);  // ne jamais bloquer le balayage si personne ne lit (à vérifier selon la version du cœur ESP32)
-  pinMode(PIN_DATA, OUTPUT);
-  pinMode(PIN_CLK, OUTPUT);
-  pinMode(PIN_LATCH, OUTPUT);
+  Serial.begin(115200);  // UART0 relié à la puce USB-série de la carte
   for (uint8_t i = 0; i < N; i++) {
+    pinMode(LED_PIN[i], OUTPUT);
     pinMode(BTN_PIN[i], INPUT_PULLUP);
     stable[i] = (digitalRead(BTN_PIN[i]) == PRESSED_LEVEL);  // pédale tenue au démarrage : pas d'événement
   }
