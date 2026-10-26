@@ -1,0 +1,310 @@
+{
+  "scenes": [
+    {
+      "id": "blanc-chaud",
+      "name": "Blanc chaud",
+      "fade_s": null,
+      "states": {
+        "p1": {
+          "rgb": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "white": 1.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p2": {
+          "rgb": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "white": 1.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p3": {
+          "rgb": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "white": 1.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p4": {
+          "rgb": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "white": 1.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        }
+      }
+    },
+    {
+      "id": "rouge",
+      "name": "Rouge",
+      "fade_s": null,
+      "states": {
+        "p1": {
+          "rgb": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p2": {
+          "rgb": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p3": {
+          "rgb": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p4": {
+          "rgb": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        }
+      }
+    },
+    {
+      "id": "bleu",
+      "name": "Bleu",
+      "fade_s": null,
+      "states": {
+        "p1": {
+          "rgb": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p2": {
+          "rgb": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p3": {
+          "rgb": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p4": {
+          "rgb": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        }
+      }
+    },
+    {
+      "id": "vert",
+      "name": "Vert",
+      "fade_s": null,
+      "states": {
+        "p1": {
+          "rgb": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p2": {
+          "rgb": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p3": {
+          "rgb": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p4": {
+          "rgb": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        }
+      }
+    },
+    {
+      "id": "magenta",
+      "name": "Magenta",
+      "fade_s": null,
+      "states": {
+        "p1": {
+          "rgb": [
+            1.0,
+            0.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p2": {
+          "rgb": [
+            1.0,
+            0.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p3": {
+          "rgb": [
+            1.0,
+            0.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        },
+        "p4": {
+          "rgb": [
+            1.0,
+            0.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.0
+        }
+      }
+    },
+    {
+      "id": "stroboscope",
+      "name": "Stroboscope blanc",
+      "fade_s": null,
+      "states": {
+        "p1": {
+          "rgb": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.8
+        },
+        "p2": {
+          "rgb": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.8
+        },
+        "p3": {
+          "rgb": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.8
+        },
+        "p4": {
+          "rgb": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "white": 0.0,
+          "amber": 0.0,
+          "intensity": 1.0,
+          "strobe": 0.8
+        }
+      }
+    }
+  ]
+}

@@ -173,6 +173,12 @@ class EngineTests(unittest.TestCase):
         e.flash_on("instant")
         self.assertEqual(e.frame(), bytes(512))
 
+    def test_full_blackout_zeroes_every_channel_even_with_a_dimmer_channel(self):
+        plan = Plan([Fixture("p", "P", STROBE_PROFILE, "m", 1)])
+        scenes = {"s": Scene("s", "S", 0.0, {"p": FixtureState(rgb=(1, 1, 1), intensity=1.0, strobe=1.0)})}
+        e = Engine(plan, scenes, clock=self.clock, initial_scene="s")
+        self.assertEqual(e.frame(), bytes(512))  # démarre en blackout : zéros partout
+
     def test_strobe_flash_scene_and_blackout_cuts_strobe(self):
         plan = Plan([Fixture("p", "P", STROBE_PROFILE, "m", 1)])
         scenes = {

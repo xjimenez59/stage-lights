@@ -1,0 +1,32 @@
+{
+  "fixtures": [
+    {
+      "id": "p1",
+      "name": "PAR 1",
+      "profile": "eurolite-party-spot-silent-rgbww",
+      "mode": "6ch",
+      "address": 1
+    },
+    {
+      "id": "p2",
+      "name": "PAR 2",
+      "profile": "eurolite-party-spot-silent-rgbww",
+      "mode": "6ch",
+      "address": 7
+    },
+    {
+      "id": "p3",
+      "name": "PAR 3",
+      "profile": "eurolite-party-spot-silent-rgbww",
+      "mode": "6ch",
+      "address": 13
+    },
+    {
+      "id": "p4",
+      "name": "PAR 4",
+      "profile": "eurolite-party-spot-silent-rgbww",
+      "mode": "6ch",
+      "address": 19
+    }
+  ]
+}

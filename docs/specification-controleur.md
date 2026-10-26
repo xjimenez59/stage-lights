@@ -147,7 +147,7 @@ Point ouvert : format exact du message `LED` (masque de 6 bits + blackout), à f
 1. ✔ Modèle de données, profils, validation, traduction couleur vers canaux, stroboscope (`stage_control/profile.py`, `plan.py`, `scene.py`, `render.py`).
 2. ✔ Moteur de scènes, fondus, blackout, flash, séquences (`engine.py`, `sequence.py`), tests avec horloge simulée.
 3. ✔ Émetteur ArtDmx vers `spi_dmx` (`output.py`), test de bout en bout contre le récepteur de `spi_dmx`.
-4. Persistance JSON (écriture atomique, `.bak`).
-5. Serveur HTTP + SSE et interface web tactile.
+4. ✔ Persistance JSON : écriture atomique, `.bak`, repli sur la copie en cas de fichier corrompu (`store.py`).
+5. ✔ Serveur HTTP + SSE (`controller.py`, `server.py`, `__main__.py` ; API décrite en tête de `server.py`). Interface web tactile : à faire.
 6. Module d'entrées et protocole série du pédalier (simulateur logiciel, puis firmware).
 7. Tests matériel : suite de `docs/plan-de-tests.md` (à compléter par une section « contrôleur »).

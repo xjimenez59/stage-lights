@@ -1,0 +1,24 @@
+[Unit]
+Description=Contrôleur d'éclairage de scène (interface web :8080, Art-Net vers spi_dmx)
+After=network.target spi-dmx.service
+Wants=spi-dmx.service
+
+[Service]
+Type=simple
+User=@USER@
+WorkingDirectory=@REPO@
+ExecStart=/usr/bin/python3 -m stage_control --data /var/lib/stage-lights --port 8080
+Restart=always
+RestartSec=2
+# SIGTERM : le contrôleur enregistre ses réglages et s'arrête proprement.
+TimeoutStopSec=10
+
+# Durcissement (à vérifier sur le Pi : si le service ne démarre pas, commencer par retirer ces lignes)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/stage-lights
+
+[Install]
+WantedBy=multi-user.target

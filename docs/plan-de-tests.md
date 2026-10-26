@@ -33,11 +33,13 @@ Cocher au fur et à mesure et noter les mesures dans ce fichier.
 - [ ] `python3 tools/artnet_send.py --host 127.0.0.1 1=255 2=255 --duration 5` : réponse ?
 - [ ] Sans réponse : inverser les fils 2 et 3 du XLR.
 
-## 5. QLC+
-- [ ] Version installée et options en ligne de commande : `qlcplus --help`.
-- [ ] Plugin OLA présent ? sinon utiliser la voie Art-Net → `spi_dmx`.
-- [ ] Interface web joignable depuis la tablette : `http://192.168.8.10:9999`.
-- [ ] Projet `.qxw` : 4 fixtures + console virtuelle ; démarrage automatique.
+## 5. Contrôleur
+- [ ] `sudo systemctl enable --now spi-dmx stage-control` : les deux services démarrent (`systemctl status`), sans erreur dans `journalctl -u stage-control`. Si `stage-control` ne démarre pas, retirer d'abord les lignes de durcissement de l'unité.
+- [ ] Interface joignable depuis la tablette : `http://192.168.8.10:8080/api/state` renvoie du JSON.
+- [ ] Essai sans interface : `curl -X POST localhost:8080/api/blackout -d '{"on": false}'` puis `curl -X POST localhost:8080/api/scenes/rouge/recall` : les 4 projecteurs passent au rouge avec fondu.
+- [ ] Pédales simulées : `curl -X POST localhost:8080/api/pedal/4 -d '{"down": true}'` (flash) puis `{"down": false}`.
+- [ ] Arrêt et redémarrage du service : la dernière scène est conservée, démarrage en blackout.
+- [ ] Mesure de la cadence réelle de la boucle d'émission (gigue) pendant l'usage de l'interface.
 
 ## 6. Endurance
 - [ ] 1 h de fonctionnement continu sans scintillement ni plantage ; relevés de température du Pi.

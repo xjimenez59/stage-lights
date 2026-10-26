@@ -15,7 +15,9 @@ Boîtier de scène pour Raspberry Pi 2 B : contrôleur d'éclairage maison (scè
 | `stage_control` : profils, plan de feu, scènes, rendu couleur → canaux | écrit, testé |
 | `stage_control` : moteur (fondus, blackout, flash, séquences) | écrit, testé avec horloge simulée |
 | `stage_control` : émetteur Art-Net vers `spi_dmx` | écrit, testé de bout en bout en local |
-| Persistance, serveur web (SSE), interface tactile | à faire |
+| `stage_control` : persistance JSON (plan, scènes, séquences, réglages) | écrit, testé |
+| `stage_control` : contrôleur (commandes, pédales, édition) et serveur HTTP + SSE | écrit, testé (`python3 -m stage_control --data DIR`) |
+| Interface web tactile (roue de couleur, scènes) | à faire |
 | Pédalier (firmware XIAO ESP32S3 + module d'entrées) | à faire |
 
 **Rien n'est validé sur le Pi, sur un analyseur logique ni sur les projecteurs** : voir les points à vérifier dans `CLAUDE.md` et le plan de tests.
@@ -41,7 +43,9 @@ Dans VS Code : ouvrir le dossier, installer les extensions recommandées, tâche
 ssh pi@192.168.8.10 'sudo ~/stage-lights/scripts/install-pi.sh'
 ```
 
-`install-pi.sh` installe OLA (voie de repli), `python3-spidev`, active SPI et l'UART, installe les unités systemd (désactivées par défaut : à activer après les tests de `docs/plan-de-tests.md`). L'unité du contrôleur reste à écrire.
+`install-pi.sh` installe OLA (voie de repli), `python3-spidev`, active SPI et l'UART, copie une seule fois des données d'exemple dans `/var/lib/stage-lights` (4 PARty Spot en 6 canaux, 6 scènes, pédales affectées) et installe les unités systemd `spi-dmx`, `stage-control` et `captive204` (désactivées par défaut : à activer après les tests de `docs/plan-de-tests.md`). L'interface du contrôleur est ensuite sur `http://<ip-du-pi>:8080`.
+
+Le nombre de canaux du démon (`--channels` dans `scripts/spi-dmx.service`, 24 pour 4 projecteurs en 6 canaux) doit suivre le plan de feu ; un test le vérifie pour les données d'exemple.
 
 Essai matériel : `python3 -m spi_dmx --test-pattern --channels 32` puis analyseur logique sur la broche 19 (MOSI).
 
@@ -54,7 +58,7 @@ stage_control/     contrôleur : profils, scènes, moteur, séquences, sortie Ar
 profiles/          profils de projecteurs (JSON)
 tools/             outils de test
 tests/             tests unitaires
-config/            OLA, config.txt, cmdline.txt
+config/            OLA, config.txt, cmdline.txt, data-example/ (données de départ du contrôleur)
 scripts/           installation, déploiement, unités systemd
 network/           routeur, faux internet
 docs/              spécification, câblage, tests matériel, étude

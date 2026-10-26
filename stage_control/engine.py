@@ -110,6 +110,7 @@ class Engine:
         self.flash_fade = flash_fade
         self.master = master
         self._lock = threading.RLock()
+        self.lock = self._lock  # pour les modifications groupées de ``scenes`` / ``sequences``
 
         # Base : interpolation entre _start et _target depuis _t0 sur _dur.
         self._start: Dict[str, FixtureState] = {}
@@ -163,11 +164,19 @@ class Engine:
                 st = self._base_state(f.id, now)
                 if self._flash_scene is not None and f.id in self._flash_scene.states and fl > 0.0:
                     st = lerp_state(st, self._flash_scene.states[f.id], fl)
-                if bo < 1.0:
-                    st = FixtureState(st.rgb, st.white, st.amber, st.intensity * bo,
-                                      st.strobe if bo > 0.0 else 0.0)
+                if bo <= 0.0:
+                    st = ZERO  # blackout complet : tout à zéro, sans dépendre du dimmer du projecteur
+                elif bo < 1.0:
+                    st = FixtureState(st.rgb, st.white, st.amber, st.intensity * bo, st.strobe)
                 out[f.id] = st
             return out
+
+    def base_states(self, now: Optional[float] = None) -> Dict[str, FixtureState]:
+        """États de la base seule (sans flash ni blackout) : ce qu'on enregistre dans une scène."""
+        with self._lock:
+            now = self._clock() if now is None else now
+            self._advance(now)
+            return {f.id: self._base_state(f.id, now) for f in self.plan.fixtures}
 
     def frame(self, now: Optional[float] = None) -> bytes:
         """Univers DMX complet (512 octets) à l'instant ``now``."""

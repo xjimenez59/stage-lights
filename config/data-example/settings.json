@@ -1,0 +1,36 @@
+{
+  "master": 1.0,
+  "default_fade": 1.0,
+  "blackout_fade": 1.0,
+  "flash_fade": 0.1,
+  "curve": "smoothstep",
+  "universe": 0,
+  "rate_hz": 40.0,
+  "last_scene": null,
+  "pedals": [
+    {
+      "type": "scene",
+      "target": "blanc-chaud"
+    },
+    {
+      "type": "scene",
+      "target": "rouge"
+    },
+    {
+      "type": "scene",
+      "target": "bleu"
+    },
+    {
+      "type": "scene",
+      "target": "vert"
+    },
+    {
+      "type": "scene",
+      "target": "magenta"
+    },
+    {
+      "type": "flash",
+      "target": "stroboscope"
+    }
+  ]
+}

@@ -19,11 +19,20 @@ fi
 
 install -m 644 "$REPO/config/ola-uartdmx.conf" /etc/ola/ola-uartdmx.conf || true
 
-for unit in spi-dmx captive204; do
+# Données du contrôleur : copiées une seule fois (jamais écrasées lors d'une mise à jour).
+DATA=/var/lib/stage-lights
+install -d -o "$USER_NAME" -g "$USER_NAME" "$DATA"
+if [ ! -e "$DATA/fixtures.json" ]; then
+  install -o "$USER_NAME" -g "$USER_NAME" -m 644 "$REPO"/config/data-example/*.json "$DATA/"
+  echo "données d'exemple installées dans $DATA (4 PARty Spot en 6 canaux, adresses 1, 7, 13, 19)"
+fi
+
+for unit in spi-dmx stage-control captive204; do
   sed "s|@REPO@|$REPO|g; s|@USER@|$USER_NAME|g" "$REPO/scripts/$unit.service" \
     > "/etc/systemd/system/$unit.service"
 done
 systemctl daemon-reload
-echo "Unités installées mais NON activées. Après les tests :"
-echo "  sudo systemctl enable --now spi-dmx"
+echo "Unités installées mais NON activées. Après les tests de docs/plan-de-tests.md :"
+echo "  sudo systemctl enable --now spi-dmx stage-control"
 echo "  sudo systemctl enable --now captive204   # optionnel"
+echo "Interface : http://<ip-du-pi>:8080"
