@@ -16,6 +16,7 @@ Routes (corps et réponses en JSON) :
     POST   /api/blackout                  {"on": true|false} ; sans corps : bascule
     POST   /api/flash/<scene_id>          {"down": true|false}
     POST   /api/fixtures/<id>/state       champs partiels : rgb, white, amber, intensity, strobe
+    POST   /api/fixtures/state            {"ids": [...], "fields": {...}} : mêmes champs, plusieurs projecteurs
     POST   /api/pedal/<n>                 {"down": true|false}, n = 1..7 (7 = blackout)
     PUT    /api/settings                  master, default_fade, blackout_fade, flash_fade, pedals
 
@@ -117,6 +118,14 @@ def build_routes(c: Controller) -> List[Route]:
             raise KeyError(m.group(1))
         c.flash(m.group(1), bool(body.get("down", True)))
         return _ok(c.status())
+
+    @route("POST", r"/api/fixtures/state")
+    def fixtures_state(m, body):
+        ids = body.get("ids")
+        fields = body.get("fields")
+        if not isinstance(ids, list) or not isinstance(fields, dict):
+            raise ValueError("« ids » (liste) et « fields » (objet) attendus")
+        return _ok({fid: st.to_dict() for fid, st in c.set_fixtures(ids, fields).items()})
 
     @route("POST", r"/api/fixtures/([^/]+)/state")
     def fixture_state(m, body):

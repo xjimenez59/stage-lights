@@ -3,3 +3,6 @@ __pycache__/
 .venv/
 *.bin
 .pytest_cache/
+
+# données locales du contrôleur (essais sur le poste de développement)
+/data/

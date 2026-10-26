@@ -17,7 +17,7 @@ Boîtier de scène pour Raspberry Pi 2 B : contrôleur d'éclairage maison (scè
 | `stage_control` : émetteur Art-Net vers `spi_dmx` | écrit, testé de bout en bout en local |
 | `stage_control` : persistance JSON (plan, scènes, séquences, réglages) | écrit, testé |
 | `stage_control` : contrôleur (commandes, pédales, édition) et serveur HTTP + SSE | écrit, testé (`python3 -m stage_control --data DIR`) |
-| Interface web tactile (roue de couleur, scènes) | à faire |
+| Interface web tactile (`stage_control/web/` : scènes, roue de couleur, séquences, réglages, pédalier simulé) | écrite, essayée dans Edge (pas sur la tablette) |
 | Pédalier (firmware XIAO ESP32S3 + module d'entrées) | à faire |
 
 **Rien n'est validé sur le Pi, sur un analyseur logique ni sur les projecteurs** : voir les points à vérifier dans `CLAUDE.md` et le plan de tests.

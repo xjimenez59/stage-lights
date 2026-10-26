@@ -148,6 +148,6 @@ Point ouvert : format exact du message `LED` (masque de 6 bits + blackout), à f
 2. ✔ Moteur de scènes, fondus, blackout, flash, séquences (`engine.py`, `sequence.py`), tests avec horloge simulée.
 3. ✔ Émetteur ArtDmx vers `spi_dmx` (`output.py`), test de bout en bout contre le récepteur de `spi_dmx`.
 4. ✔ Persistance JSON : écriture atomique, `.bak`, repli sur la copie en cas de fichier corrompu (`store.py`).
-5. ✔ Serveur HTTP + SSE (`controller.py`, `server.py`, `__main__.py` ; API décrite en tête de `server.py`). Interface web tactile : à faire.
+5. ✔ Serveur HTTP + SSE (`controller.py`, `server.py`, `__main__.py` ; API décrite en tête de `server.py`). Interface web tactile ✔ (`stage_control/web/`, 4 onglets : Jeu, Couleurs, Séquences, Réglages ; essayée dans Edge, à essayer sur la tablette Android).
 6. Module d'entrées et protocole série du pédalier (simulateur logiciel, puis firmware).
 7. Tests matériel : suite de `docs/plan-de-tests.md` (à compléter par une section « contrôleur »).

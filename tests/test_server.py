@@ -118,6 +118,27 @@ class ApiTests(ServerCase):
         self.assertEqual(self.engine.frame()[0:4], bytes([0, 255, 0, 128]))
         self.assertEqual(self.engine.frame()[6:9], bytes([255, 0, 0]))  # l'autre projecteur ne bouge pas
 
+    def test_batch_fixture_state(self):
+        self.req("POST", "/api/blackout", {"on": False})
+        status, out = self.req("POST", "/api/fixtures/state",
+                               {"ids": ["p1", "p2"], "fields": {"rgb": [0, 0, 1], "intensity": 0.5}})
+        self.assertEqual(status, 200)
+        self.assertEqual(set(out), {"p1", "p2"})
+        f = self.engine.frame()
+        self.assertEqual(f[0:3], bytes([0, 0, 255]))
+        self.assertEqual(f[6:9], bytes([0, 0, 255]))
+        self.assertEqual(f[4], 128)  # dimmer à 50 %
+
+    def test_batch_is_all_or_nothing(self):
+        self.req("POST", "/api/blackout", {"on": False})
+        self.req("POST", "/api/scenes/rouge/recall")
+        self.assertEqual(self.req("POST", "/api/fixtures/state",
+                                  {"ids": ["p1", "fantome"], "fields": {"rgb": [0, 1, 0]}})[0], 404)
+        self.assertEqual(self.engine.frame()[0:3], bytes([255, 0, 0]))  # p1 n'a pas bougé
+        self.assertEqual(self.req("POST", "/api/fixtures/state",
+                                  {"ids": ["p1"], "fields": {"intensity": 9}})[0], 400)
+        self.assertEqual(self.req("POST", "/api/fixtures/state", {"ids": "p1", "fields": {}})[0], 400)
+
     def test_flash_endpoint(self):
         self.req("POST", "/api/blackout", {"on": False})
         _, st = self.req("POST", "/api/flash/strobe", {"down": True})
@@ -189,13 +210,17 @@ class PedalTests(ServerCase):
         st = self.press(3)  # lance « duo »
         self.assertTrue(st["leds"]["slots"][2])
         self.assertEqual(st["active"], "rouge")
+        # « rouge » est la scène de la pédale 1 et la 1re étape de la séquence : sa LED reste éteinte
+        self.assertFalse(st["leds"]["slots"][0])
         st = self.press(5)  # étape suivante
         self.assertEqual(st["active"], "bleu")
         st = self.press(6)  # étape précédente
         self.assertEqual(st["active"], "rouge")
+        self.assertFalse(st["leds"]["slots"][1])  # idem pour « bleu » (pédale 2), étape en cours
         st = self.press(3)  # second appui : arrête
         self.assertFalse(st["leds"]["slots"][2])
         self.assertIsNone(st["sequence"])
+        self.assertTrue(st["leds"]["slots"][0])  # la dernière scène reste active : sa pédale s'allume
 
 
 class EditingTests(ServerCase):
@@ -310,6 +335,29 @@ class StaticAndSseTests(ServerCase):
             self.assertEqual(read_event()[0], "config")  # l'état ne change pas : seul « config » part
         finally:
             conn.close()
+
+
+class WebFilesTests(unittest.TestCase):
+    """L'interface livrée : la page et les fichiers qu'elle référence existent."""
+
+    WEB = os.path.join(os.path.dirname(__file__), "..", "stage_control", "web")
+
+    def test_index_references_existing_files(self):
+        import re
+        with open(os.path.join(self.WEB, "index.html"), encoding="utf-8") as f:
+            html = f.read()
+        refs = re.findall(r'(?:src|href)="([^"#:]+)"', html)
+        self.assertIn("app.js", refs)
+        self.assertIn("style.css", refs)
+        for ref in refs:
+            self.assertTrue(os.path.isfile(os.path.join(self.WEB, ref)), ref)
+
+    def test_interface_uses_no_external_resource(self):
+        # le boîtier n'a pas d'internet : aucune ressource externe (CDN, polices...)
+        for fn in ("index.html", "app.js", "style.css"):
+            with open(os.path.join(self.WEB, fn), encoding="utf-8") as f:
+                text = f.read()
+            self.assertNotRegex(text, r"https?://", fn)
 
 
 if __name__ == "__main__":

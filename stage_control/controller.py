@@ -84,7 +84,9 @@ class Controller:
         slots: List[bool] = []
         for action in self.settings.pedals:
             if action.type == "scene":
-                lit = st["active"] == action.target
+                # Pendant une séquence, seule la pédale de la séquence est allumée : sinon la
+                # LED d'une scène qui apparaît dans la séquence prêterait à confusion.
+                lit = st["sequence"] is None and st["active"] == action.target
             elif action.type == "sequence":
                 lit = st["sequence"] == action.target
             elif action.type == "flash":
@@ -180,19 +182,30 @@ class Controller:
         self.engine.prev_step()
         self.poll()
 
-    def set_fixture(self, fixture_id: str, fields: dict) -> FixtureState:
-        """Réglage direct (roue de couleur, sliders) : seuls les champs fournis changent."""
+    def set_fixtures(self, fixture_ids: List[str], fields: dict) -> Dict[str, FixtureState]:
+        """Réglage direct (roue de couleur, sliders) de plusieurs projecteurs à la fois.
+
+        Seuls les champs fournis changent. Tout est validé avant d'appliquer quoi que ce soit.
+        """
         unknown = set(fields) - set(_STATE_FIELDS)
         if unknown:
             raise ValueError(f"champs inconnus : {', '.join(sorted(unknown))}")
         with self.engine.lock:
-            self.engine.plan.get(fixture_id)
-            current = self.engine.base_states()[fixture_id].to_dict()
-            current.update(fields)
-            state = FixtureState.from_dict(current)
-            self.engine.set_state(fixture_id, state)
+            for fid in fixture_ids:
+                self.engine.plan.get(fid)  # KeyError si inconnu
+            base = self.engine.base_states()
+            new = {}
+            for fid in fixture_ids:
+                merged = base[fid].to_dict()
+                merged.update(fields)
+                new[fid] = FixtureState.from_dict(merged)
+            for fid, state in new.items():
+                self.engine.set_state(fid, state)
         self.poll()
-        return state
+        return new
+
+    def set_fixture(self, fixture_id: str, fields: dict) -> FixtureState:
+        return self.set_fixtures([fixture_id], fields)[fixture_id]
 
     def pedal(self, n: int, down: bool) -> None:
         """Événement de pédale : ``n`` de 1 à 7 (7 = blackout), ``down`` = appui / relâchement."""
