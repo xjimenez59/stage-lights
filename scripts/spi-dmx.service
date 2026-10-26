@@ -5,9 +5,9 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=@REPO@
-# --channels : dernier canal utilisé par le plan de feu (4 PARty Spot en 6 canaux = 24).
-# À augmenter si l'on ajoute des projecteurs ; le contrôleur affiche ce nombre dans son journal au démarrage.
-ExecStart=/usr/bin/python3 -m spi_dmx --universe 0 --channels 24 --rate 40 --bind 127.0.0.1
+# Pas de --channels : le démon émet autant de canaux que le dernier paquet Art-Net reçu
+# (le contrôleur envoie jusqu'au dernier canal utilisé par le plan de feu).
+ExecStart=/usr/bin/python3 -m spi_dmx --universe 0 --rate 40 --bind 127.0.0.1
 Restart=always
 RestartSec=2
 Nice=-10

@@ -13,10 +13,13 @@ version précédente. À la lecture, un fichier illisible est remplacé par sa c
 
 from __future__ import annotations
 
+import io
 import json
 import logging
 import os
+import re
 import shutil
+import zipfile
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -27,6 +30,14 @@ from .scene import Scene
 from .sequence import Sequence
 
 log = logging.getLogger("stage_control.store")
+
+_PROFILE_KEY = re.compile(r"^[a-z0-9][a-z0-9_-]{0,59}$")
+
+
+def valid_profile_key(key: str) -> bool:
+    """Un identifiant de modèle devient un nom de fichier : on n'accepte rien d'autre que ceci."""
+    return isinstance(key, str) and bool(_PROFILE_KEY.match(key))
+
 
 PEDAL_SLOTS = 6
 PEDAL_TYPES = ("none", "scene", "sequence", "flash", "next", "prev")
@@ -120,6 +131,7 @@ class Settings:
 class Store:
     def __init__(self, data_dir: str, profiles_dir: Optional[str] = None):
         self.data_dir = data_dir
+        self.bundled_dir = profiles_dir  # modèles fournis avec le dépôt (jamais modifiés)
         # Profils du dépôt (par défaut ./profiles), complétés par ceux du répertoire de données.
         self.profiles_dirs = [d for d in (profiles_dir, os.path.join(data_dir, "profiles")) if d]
 
@@ -139,6 +151,58 @@ class Store:
                     out[fn[:-5]] = load_profile(os.path.join(d, fn))
         return out
 
+    def profile_path(self, key: str) -> Optional[str]:
+        """Fichier d'un modèle (celui du répertoire de données l'emporte sur celui du dépôt)."""
+        if not valid_profile_key(key):
+            return None
+        found = None
+        for d in self.profiles_dirs:
+            path = os.path.join(d, key + ".json")
+            if os.path.isfile(path):
+                found = path
+        return found
+
+    def profile_origin(self, key: str) -> str:
+        """``custom`` : fichier du répertoire de données ; ``bundled`` : fichier fourni avec le dépôt."""
+        path = self.profile_path(key)
+        custom_dir = os.path.abspath(os.path.join(self.data_dir, "profiles"))
+        return "custom" if path and os.path.abspath(os.path.dirname(path)) == custom_dir else "bundled"
+
+    def read_profile_raw(self, key: str) -> bytes:
+        path = self.profile_path(key)
+        if path is None:
+            raise KeyError(key)
+        with open(path, "rb") as f:
+            return f.read()
+
+    def save_profile(self, key: str, data: dict) -> None:
+        """Enregistre un modèle dans le répertoire de données (il remplace celui du dépôt)."""
+        if not valid_profile_key(key):
+            raise ValueError("identifiant de modèle invalide (lettres minuscules, chiffres, - et _)")
+        write_json_atomic(os.path.join(self.data_dir, "profiles", key + ".json"), data)
+
+    def bundled_profile_path(self, key: str) -> Optional[str]:
+        """Version fournie avec le dépôt d'un modèle (qu'il soit ou non masqué par une version personnalisée)."""
+        if not self.bundled_dir or not valid_profile_key(key):
+            return None
+        path = os.path.join(self.bundled_dir, key + ".json")
+        return path if os.path.isfile(path) else None
+
+    def delete_custom_profile(self, key: str) -> None:
+        """Supprime la version personnalisée d'un modèle ; une copie ``.bak`` du fichier supprimé est gardée."""
+        if self.profile_origin(key) != "custom":
+            raise ValueError(f"le modèle {key!r} n'est pas personnalisé")
+        path = self.profile_path(key)
+        os.replace(path, path + ".bak")
+
+    def export_profiles_zip(self) -> bytes:
+        """Tous les modèles disponibles, un fichier JSON par modèle, dans une archive."""
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            for key in sorted(self.load_profiles()):
+                z.writestr(key + ".json", self.read_profile_raw(key))
+        return buf.getvalue()
+
     def load_plan(self) -> Plan:
         profiles = self.load_profiles()
         fixtures = []
@@ -147,7 +211,7 @@ class Store:
             if key not in profiles:
                 raise ValueError(f"projecteur {raw.get('id')!r} : profil inconnu {key!r}")
             fixtures.append(Fixture(raw["id"], raw.get("name", raw["id"]), profiles[key],
-                                    raw["mode"], int(raw["address"])))
+                                    raw["mode"], int(raw["address"]), key))
         return Plan(fixtures)
 
     def save_plan(self, plan_spec: List[dict]) -> None:

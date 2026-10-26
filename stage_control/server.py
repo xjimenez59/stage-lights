@@ -4,6 +4,14 @@ Routes (corps et réponses en JSON) :
 
     GET    /api/state                     tout l'état pour l'affichage
     GET    /api/events                    flux SSE : événements ``status`` et ``config``
+    GET    /api/profiles/<clé>/download   fichier JSON d'un modèle de projecteur
+    GET    /api/profiles/download-all     archive .zip de tous les modèles
+    GET    /api/profiles/<clé>/raw        texte du modèle (pour l'éditeur)
+    POST   /api/profiles/<clé>/check      {"profile": {...}} : contrôle sans rien modifier
+    PUT    /api/profiles/<clé>            {"profile": {...}} : contrôle puis intégration
+    DELETE /api/profiles/<clé>            supprime un modèle personnalisé (ou revient à la version fournie)
+    PUT    /api/scene-order               {"ids": [...]} : ordre de présentation des scènes
+    POST   /api/states                    {"states": {id: état complet}} : aperçu / retour à un état
     POST   /api/scenes/<id>/recall
     POST   /api/scenes                    créer  (name, fade_s, states | capture)
     PUT    /api/scenes/<id>               remplacer
@@ -15,6 +23,9 @@ Routes (corps et réponses en JSON) :
     POST   /api/sequence/next|prev|stop
     POST   /api/blackout                  {"on": true|false} ; sans corps : bascule
     POST   /api/flash/<scene_id>          {"down": true|false}
+    POST   /api/fixtures                  ajouter au plan de feu (name, profile, mode, address facultative)
+    PUT    /api/fixtures/<id>             modifier (name, profile, mode, address)
+    DELETE /api/fixtures/<id>
     POST   /api/fixtures/<id>/state       champs partiels : rgb, white, amber, intensity, strobe
     POST   /api/fixtures/state            {"ids": [...], "fields": {...}} : mêmes champs, plusieurs projecteurs
     POST   /api/pedal/<n>                 {"down": true|false}, n = 1..7 (7 = blackout)
@@ -35,7 +46,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Callable, List, Tuple
 from urllib.parse import unquote, urlsplit
 
-from .controller import Conflict, Controller
+from .controller import Conflict, Controller, fixture_json
 
 log = logging.getLogger("stage_control.server")
 
@@ -43,6 +54,13 @@ MAX_BODY = 64 * 1024
 SSE_PING_S = 15.0
 
 Route = Tuple[str, "re.Pattern", Callable]
+
+
+class Download:
+    """Réponse fichier (téléchargement) au lieu d'un objet JSON."""
+
+    def __init__(self, filename: str, content_type: str, data: bytes):
+        self.filename, self.content_type, self.data = filename, content_type, data
 
 
 def _ok(obj=None, status: int = 200):
@@ -62,6 +80,47 @@ def build_routes(c: Controller) -> List[Route]:
     @route("GET", r"/api/state")
     def state(m, body):
         return _ok(c.dump())
+
+    @route("GET", r"/api/profiles/download-all")
+    def profiles_zip(m, body):
+        return _ok(Download("modeles-projecteurs.zip", "application/zip", c.store.export_profiles_zip()))
+
+    @route("GET", r"/api/profiles/([^/]+)/download")
+    def profile_download(m, body):
+        key = m.group(1)
+        return _ok(Download(key + ".json", "application/json; charset=utf-8", c.store.read_profile_raw(key)))
+
+    @route("GET", r"/api/profiles/([^/]+)/raw")
+    def profile_raw(m, body):
+        return _ok({"key": m.group(1), "text": c.store.read_profile_raw(m.group(1)).decode("utf-8"),
+                    "origin": c.store.profile_origin(m.group(1))})
+
+    @route("POST", r"/api/profiles/([^/]+)/check")
+    def profile_check(m, body):
+        return _ok(c.check_profile(m.group(1), body.get("profile")))
+
+    @route("PUT", r"/api/profiles/([^/]+)")
+    def profile_put(m, body):
+        return _ok(c.save_profile(m.group(1), body.get("profile")))
+
+    @route("DELETE", r"/api/profiles/([^/]+)")
+    def profile_delete(m, body):
+        return _ok(c.delete_profile(m.group(1)))
+
+    @route("PUT", r"/api/scene-order")
+    def scene_order(m, body):
+        ids = body.get("ids")
+        if not isinstance(ids, list):
+            raise ValueError("« ids » (liste) attendu")
+        c.reorder_scenes(ids)
+        return _ok({"ids": list(c.engine.scenes)})
+
+    @route("POST", r"/api/states")
+    def apply_states(m, body):
+        states = body.get("states")
+        if not isinstance(states, dict):
+            raise ValueError("« states » (objet) attendu")
+        return _ok({fid: st.to_dict() for fid, st in c.apply_states(states).items()})
 
     @route("POST", r"/api/scenes/([^/]+)/recall")
     def recall(m, body):
@@ -119,6 +178,19 @@ def build_routes(c: Controller) -> List[Route]:
         c.flash(m.group(1), bool(body.get("down", True)))
         return _ok(c.status())
 
+    @route("POST", r"/api/fixtures")
+    def fixture_create(m, body):
+        return _ok(fixture_json(c.save_fixture(None, body)), 201)
+
+    @route("PUT", r"/api/fixtures/([^/]+)")
+    def fixture_put(m, body):
+        return _ok(fixture_json(c.save_fixture(m.group(1), body)))
+
+    @route("DELETE", r"/api/fixtures/([^/]+)")
+    def fixture_delete(m, body):
+        c.delete_fixture(m.group(1))
+        return _ok()
+
     @route("POST", r"/api/fixtures/state")
     def fixtures_state(m, body):
         ids = body.get("ids")
@@ -163,6 +235,15 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _send_download(self, d: Download) -> None:
+        self.send_response(200)
+        self.send_header("Content-Type", d.content_type)
+        self.send_header("Content-Length", str(len(d.data)))
+        self.send_header("Content-Disposition", f'attachment; filename="{d.filename}"')
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(d.data)
+
     def _error(self, status: int, message: str) -> None:
         self._send_json(status, {"error": message})
 
@@ -201,6 +282,8 @@ class Handler(BaseHTTPRequestHandler):
                     except Exception:
                         log.exception("erreur interne sur %s %s", method, path)
                         return self._error(500, "erreur interne")
+                    if isinstance(obj, Download):
+                        return self._send_download(obj)
                     return self._send_json(status, obj)
             return self._error(404, "route inconnue")
         if method == "GET":

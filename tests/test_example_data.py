@@ -15,12 +15,15 @@ class ExampleDataTests(unittest.TestCase):
     def test_builds_an_engine_with_four_spots(self):
         engine, settings = self.store.build_engine()
         self.assertEqual([f.address for f in engine.plan.fixtures], [1, 7, 13, 19])
-        self.assertEqual(engine.plan.channel_count(), 24)  # = --channels de spi-dmx.service
+        self.assertEqual(engine.plan.channel_count(), 24)
         self.assertEqual(len(engine.scenes), 6)
 
-    def test_service_channel_count_matches_the_plan(self):
+    def test_service_lets_the_daemon_follow_the_plan(self):
+        # sans --channels fixe, le démon suit la longueur des paquets Art-Net du contrôleur
         with open(os.path.join(ROOT, "scripts", "spi-dmx.service"), encoding="utf-8") as f:
-            self.assertIn("--channels 24", f.read())
+            exec_lines = [line for line in f if line.startswith("ExecStart=")]
+        self.assertEqual(len(exec_lines), 1)
+        self.assertNotIn("--channels", exec_lines[0])
 
     def test_pedals_point_to_existing_scenes(self):
         engine, settings = self.store.build_engine()

@@ -325,6 +325,19 @@ class Engine:
             self._start[fixture_id] = state
             self._target[fixture_id] = state
 
+    def set_plan(self, plan: Plan) -> None:
+        """Remplace le plan de feu à chaud (projecteur ajouté, déplacé ou retiré)."""
+        with self._lock:
+            now = self._clock()
+            known = {f.id for f in plan.fixtures}
+            # Les états affichés des projecteurs conservés sont figés tels quels ; ceux des
+            # projecteurs retirés sont oubliés (s'ils reviennent, ils repartent à zéro).
+            current = {f.id: self._base_state(f.id, now) for f in self.plan.fixtures if f.id in known}
+            self.plan = plan
+            self._start = current
+            self._target = dict(current)
+            self._dur = 0.0
+
     def set_master(self, master: float) -> None:
         if not 0.0 <= master <= 1.0:
             raise ValueError(f"intensité générale hors 0..1 : {master}")

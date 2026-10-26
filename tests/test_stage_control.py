@@ -64,6 +64,35 @@ class PlanTests(unittest.TestCase):
             Plan([Fixture("a", "A", RGB, "3ch", 1), Fixture("a", "B", RGB, "3ch", 10)])
 
 
+class PlanAddressTests(unittest.TestCase):
+    def plan(self, *spec):
+        return Plan([Fixture(f"f{a}", f"F{a}", RGB, "3ch", a) for a in spec])
+
+    def test_free_address_empty_plan(self):
+        self.assertEqual(self.plan().free_address(6), 1)
+
+    def test_free_address_after_last_fixture(self):
+        self.assertEqual(self.plan(1, 4).free_address(3), 7)
+
+    def test_free_address_uses_the_first_gap_that_fits(self):
+        p = self.plan(1, 10)  # occupe 1-3 et 10-12 : un trou de 4 à 9
+        self.assertEqual(p.free_address(3), 4)
+        self.assertEqual(p.free_address(6), 4)
+        self.assertEqual(p.free_address(7), 13)  # trop grand pour le trou
+
+    def test_free_address_ignores_the_fixture_being_edited(self):
+        self.assertEqual(self.plan(1).free_address(3, ignore="f1"), 1)
+
+    def test_free_address_when_full(self):
+        p = self.plan(1, 4, 7)
+        self.assertEqual(p.free_address(510), None)  # 510 canaux ne tiennent pas après 9
+        self.assertEqual(p.free_address(503), 10)  # 10..512 : exactement jusqu'au bout
+
+    def test_to_spec_keeps_profile_key(self):
+        p = Plan([Fixture("a", "A", RGB, "3ch", 5, "ma-cle")])
+        self.assertEqual(p.to_spec(), [{"id": "a", "name": "A", "profile": "ma-cle", "mode": "3ch", "address": 5}])
+
+
 class RenderTests(unittest.TestCase):
     def test_scale_mode_without_intensity_channel(self):
         f = Fixture("a", "A", RGB, "3ch", 1)

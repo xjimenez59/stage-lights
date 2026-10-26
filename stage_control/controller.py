@@ -7,6 +7,7 @@ avec un délai, la dernière scène active.
 
 from __future__ import annotations
 
+import json
 import logging
 import queue
 import re
@@ -16,9 +17,11 @@ import unicodedata
 from typing import Dict, List, Optional
 
 from .engine import Engine
+from .plan import UNIVERSE_SIZE, Fixture, Plan
+from .profile import profile_from_dict
 from .scene import FixtureState, Scene
 from .sequence import Sequence, Step
-from .store import PEDAL_SLOTS, PedalAction, Settings, Store
+from .store import PEDAL_SLOTS, PedalAction, Settings, Store, valid_profile_key
 
 log = logging.getLogger("stage_control.controller")
 
@@ -62,6 +65,12 @@ def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-") or "sans-nom"
 
 
+def fixture_json(f: Fixture) -> dict:
+    return {"id": f.id, "name": f.name, "profile": f.profile.name, "profile_key": f.profile_key,
+            "mode": f.mode_name, "address": f.address, "end": f.end, "channels": f.mode.size,
+            "roles": [c.role for c in f.mode.channels]}
+
+
 class Controller:
     def __init__(self, engine: Engine, store: Store, settings: Settings,
                  bus: Optional[EventBus] = None, save_delay: float = 5.0,
@@ -69,6 +78,7 @@ class Controller:
         self.engine = engine
         self.store = store
         self.settings = settings
+        self.profiles = store.load_profiles()  # modèles de projecteurs disponibles (par nom de fichier)
         self.bus = bus or EventBus()
         self.save_delay = save_delay
         self._clock = clock
@@ -125,20 +135,144 @@ class Controller:
     def dump(self) -> dict:
         """Tout ce dont l'interface a besoin pour s'afficher."""
         with self._lock, self.engine.lock:
-            fixtures = []
-            for f in self.engine.plan.fixtures:
-                roles = [c.role for c in f.mode.channels]
-                fixtures.append({"id": f.id, "name": f.name, "profile": f.profile.name,
-                                 "mode": f.mode_name, "address": f.address, "roles": roles})
+            plan = self.engine.plan
             base = self.engine.base_states()
             return {
-                "fixtures": fixtures,
+                "fixtures": [fixture_json(f) for f in plan.fixtures],
+                "profiles": self._profiles_json(plan),
+                "dmx": {"channels": plan.channel_count(), "size": UNIVERSE_SIZE},
                 "scenes": [s.to_dict() for s in self.engine.scenes.values()],
                 "sequences": [s.to_dict() for s in self.engine.sequences.values()],
                 "settings": self.settings.to_dict(),
                 "status": self.status(),
                 "current": {fid: st.to_dict() for fid, st in base.items()},
             }
+
+    def _profiles_json(self, plan: Plan) -> dict:
+        """Modèles disponibles : modes, rôle de chaque canal, et première adresse libre."""
+        out = {}
+        for key, p in self.profiles.items():
+            modes = {}
+            for name, m in p.modes.items():
+                modes[name] = {"size": m.size, "next_address": plan.free_address(m.size),
+                               "channels": [{"role": c.role, "default": c.default, "min": c.min,
+                                             "max": c.max} for c in m.channels]}
+            out[key] = {"name": p.name, "manufacturer": p.manufacturer, "modes": modes,
+                        "origin": self.store.profile_origin(key),
+                        "has_bundled": self.store.bundled_profile_path(key) is not None}
+        return out
+
+    # -- modèles de projecteurs : contrôle et intégration --------------------
+
+    @staticmethod
+    def _layout(profile) -> Dict[str, list]:
+        return {name: [(c.role, c.default, c.min, c.max) for c in m.channels]
+                for name, m in profile.modes.items()}
+
+    def check_profile(self, key: str, data) -> dict:
+        """Contrôle un modèle avant intégration, sans rien modifier.
+
+        Renvoie ``ok`` (aucune erreur bloquante), les ``errors`` bloquantes, les ``warnings``, la liste
+        des ``changes`` par rapport au modèle de même identifiant, les projecteurs ``impacted`` et un
+        aperçu ``profile`` (modes et canaux).
+        """
+        if not valid_profile_key(key):
+            raise ValueError("identifiant de modèle invalide (lettres minuscules, chiffres, - et _, 60 caractères au plus)")
+        report = {"key": key, "exists": key in self.profiles, "ok": False, "errors": [], "warnings": [],
+                  "changes": [], "impacted": [], "profile": None}
+        try:
+            new = profile_from_dict(data)
+        except (ValueError, TypeError, AttributeError, KeyError) as exc:
+            report["errors"].append(f"modèle invalide : {exc}")
+            return report
+        with self._lock, self.engine.lock:
+            plan = self.engine.plan
+            report["profile"] = {"name": new.name, "manufacturer": new.manufacturer, "modes": {
+                name: {"size": m.size, "channels": [{"role": c.role, "default": c.default, "min": c.min,
+                                                     "max": c.max} for c in m.channels]}
+                for name, m in new.modes.items()}}
+            old = self.profiles.get(key)
+            if old is not None:
+                if old.name != new.name:
+                    report["changes"].append(f"nom : « {old.name} » devient « {new.name} »")
+                old_l, new_l = self._layout(old), self._layout(new)
+                for mode in old_l.keys() - new_l.keys():
+                    report["changes"].append(f"mode {mode} supprimé")
+                for mode in new_l.keys() - old_l.keys():
+                    report["changes"].append(f"mode {mode} ajouté ({len(new_l[mode])} canaux)")
+                for mode in old_l.keys() & new_l.keys():
+                    if old_l[mode] != new_l[mode]:
+                        a, b = len(old_l[mode]), len(new_l[mode])
+                        report["changes"].append(f"mode {mode} : " + (f"{a} → {b} canaux" if a != b
+                                                                      else "fonctions des canaux modifiées"))
+                if not report["changes"]:
+                    report["warnings"].append("identique au modèle actuel : rien à changer")
+            for other_key, other in self.profiles.items():
+                if other_key != key and other.name == new.name:
+                    report["warnings"].append(f"même nom que le modèle « {other_key} »")
+            users = [f for f in plan.fixtures if f.profile_key == key]
+            report["impacted"] = [f.name for f in users]
+            for f in users:
+                if f.mode_name not in new.modes:
+                    report["errors"].append(f"« {f.name} » utilise le mode {f.mode_name}, absent du nouveau modèle")
+            if users and not report["errors"]:
+                trial = [Fixture(f.id, f.name, new if f.profile_key == key else f.profile, f.mode_name,
+                                 f.address, f.profile_key) for f in plan.fixtures]
+                try:
+                    Plan(trial)
+                except ValueError as exc:
+                    report["errors"].append(f"le plan de feu ne tiendrait plus : {exc}")
+        report["ok"] = not report["errors"]
+        return report
+
+    def delete_profile(self, key: str) -> dict:
+        """Supprime la version personnalisée d'un modèle.
+
+        Si le dépôt fournit ce modèle, on **revient à la version fournie** (après avoir vérifié qu'elle
+        convient au plan de feu). Sinon le modèle disparaît, à condition qu'aucun projecteur ne l'utilise.
+        """
+        if not valid_profile_key(key) or key not in self.profiles:
+            raise KeyError(key)
+        if self.store.profile_origin(key) != "custom":
+            raise Conflict("modèle fourni avec le dépôt : il ne peut pas être supprimé")
+        with self._lock, self.engine.lock:
+            plan = self.engine.plan
+            users = [f for f in plan.fixtures if f.profile_key == key]
+            bundled_path = self.store.bundled_profile_path(key)
+            if bundled_path is None:
+                if users:
+                    raise Conflict("modèle utilisé par : " + ", ".join(f.name for f in users))
+            else:
+                with open(bundled_path, encoding="utf-8") as f:
+                    rep = self.check_profile(key, json.load(f))
+                if not rep["ok"]:
+                    raise Conflict("la version fournie ne convient pas au plan de feu : " + " ; ".join(rep["errors"]))
+            self.store.delete_custom_profile(key)
+            self.profiles = self.store.load_profiles()
+            if users and bundled_path is not None:
+                back = self.profiles[key]
+                self.engine.set_plan(Plan([Fixture(f.id, f.name, back if f.profile_key == key else f.profile,
+                                                   f.mode_name, f.address, f.profile_key)
+                                           for f in plan.fixtures]))
+        self._changed()
+        return {"key": key, "reverted": bundled_path is not None}
+
+    def save_profile(self, key: str, data) -> dict:
+        """Intègre un modèle contrôlé : fichier du répertoire de données, plan de feu mis à jour à chaud."""
+        report = self.check_profile(key, data)
+        if not report["ok"]:
+            raise ValueError(" ; ".join(report["errors"]))
+        with self._lock, self.engine.lock:
+            self.store.save_profile(key, data)
+            self.profiles = self.store.load_profiles()
+            new = self.profiles[key]
+            plan = self.engine.plan
+            if any(f.profile_key == key for f in plan.fixtures):
+                self.engine.set_plan(Plan([Fixture(f.id, f.name, new if f.profile_key == key else f.profile,
+                                                   f.mode_name, f.address, f.profile_key)
+                                           for f in plan.fixtures]))
+        self._changed()
+        return report
 
     def _changed(self) -> None:
         self.bus.publish("config", {"t": time.time()})
@@ -207,6 +341,30 @@ class Controller:
     def set_fixture(self, fixture_id: str, fields: dict) -> FixtureState:
         return self.set_fixtures([fixture_id], fields)[fixture_id]
 
+    def apply_states(self, states: dict) -> Dict[str, FixtureState]:
+        """Applique des états complets, un par projecteur (aperçu d'une scène en édition, retour à
+        l'état d'avant). Tout est validé avant d'appliquer quoi que ce soit."""
+        with self.engine.lock:
+            parsed = {}
+            for fid, raw in states.items():
+                self.engine.plan.get(fid)  # KeyError si inconnu
+                parsed[fid] = FixtureState.from_dict(raw)
+            for fid, st in parsed.items():
+                self.engine.set_state(fid, st)
+        self.poll()
+        return parsed
+
+    def reorder_scenes(self, ids: List[str]) -> None:
+        """Change l'ordre de présentation des scènes (``ids`` : toutes les scènes, dans le nouvel ordre)."""
+        with self.engine.lock:
+            if len(set(ids)) != len(ids) or set(ids) != set(self.engine.scenes):
+                raise ValueError("la liste doit contenir chaque scène existante exactement une fois")
+            ordered = [self.engine.scenes[i] for i in ids]
+            self.engine.scenes.clear()
+            self.engine.scenes.update((s.id, s) for s in ordered)
+            self.store.save_scenes(self.engine.scenes)
+        self._changed()
+
     def pedal(self, n: int, down: bool) -> None:
         """Événement de pédale : ``n`` de 1 à 7 (7 = blackout), ``down`` = appui / relâchement."""
         if not 1 <= n <= BLACKOUT_PEDAL:
@@ -230,6 +388,63 @@ class Controller:
         self.poll()
 
     # -- édition -----------------------------------------------------------
+
+    def save_fixture(self, fixture_id: Optional[str], data: dict) -> Fixture:
+        """Ajoute (``fixture_id`` vide) ou modifie un projecteur du plan de feu.
+
+        ``data`` : ``name``, ``profile`` (clé du modèle), ``mode``, ``address`` (optionnelle : à la
+        création, première adresse libre). Le plan est validé en entier avant d'être appliqué.
+        """
+        with self._lock, self.engine.lock:
+            plan = self.engine.plan
+            existing = next((f for f in plan.fixtures if f.id == fixture_id), None) if fixture_id else None
+            if fixture_id and existing is None:
+                raise KeyError(fixture_id)
+            name = str(data.get("name", existing.name if existing else "")).strip()
+            if not name:
+                raise ValueError("nom requis")
+            key = data.get("profile", existing.profile_key if existing else None)
+            if key not in self.profiles:
+                raise ValueError(f"modèle inconnu : {key!r}")
+            profile = self.profiles[key]
+            mode_name = data.get("mode", existing.mode_name if existing else None)
+            size = profile.mode(mode_name).size  # ValueError si le mode n'existe pas
+            address = data.get("address")
+            if address is None:
+                address = existing.address if existing else plan.free_address(size)
+            if address is None:
+                raise ValueError("plus de place dans l'univers DMX (512 canaux)")
+            try:
+                address = int(address)
+            except (TypeError, ValueError):
+                raise ValueError("adresse DMX invalide") from None
+            if fixture_id is None:
+                base_id, i = slugify(name), 1
+                taken = {f.id for f in plan.fixtures} | {"state"}  # « state » est une route de l'API
+                fixture_id = base_id
+                while fixture_id in taken:
+                    i += 1
+                    fixture_id = f"{base_id}-{i}"
+            new = Fixture(fixture_id, name, profile, mode_name, address, key)
+            fixtures = [new if f.id == fixture_id else f for f in plan.fixtures]
+            if existing is None:
+                fixtures.append(new)
+            new_plan = Plan(fixtures)  # ValueError : chevauchement, hors univers
+            self.store.save_plan(new_plan.to_spec())
+            self.engine.set_plan(new_plan)
+        self._changed()
+        return new
+
+    def delete_fixture(self, fixture_id: str) -> None:
+        """Retire un projecteur du plan. Les scènes gardent son état, ignoré tant qu'il est absent."""
+        with self._lock, self.engine.lock:
+            plan = self.engine.plan
+            if not any(f.id == fixture_id for f in plan.fixtures):
+                raise KeyError(fixture_id)
+            new_plan = Plan([f for f in plan.fixtures if f.id != fixture_id])
+            self.store.save_plan(new_plan.to_spec())
+            self.engine.set_plan(new_plan)
+        self._changed()
 
     def save_scene(self, scene_id: Optional[str], data: dict) -> Scene:
         """Crée (``scene_id`` vide) ou remplace une scène.

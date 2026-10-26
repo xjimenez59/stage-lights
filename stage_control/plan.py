@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Optional
 
 from .profile import Mode, Profile
 
@@ -17,6 +17,7 @@ class Fixture:
     profile: Profile
     mode_name: str
     address: int  # 1..512, premier canal
+    profile_key: str = ""  # nom du fichier de profil (sans .json), pour réécrire le plan
 
     @property
     def mode(self) -> Mode:
@@ -56,6 +57,25 @@ class Plan:
             if f.id == fixture_id:
                 return f
         raise KeyError(fixture_id)
+
+    def free_address(self, size: int, ignore: str = "") -> Optional[int]:
+        """Plus petite adresse de départ libre pour ``size`` canaux consécutifs, ou ``None``.
+
+        ``ignore`` : identifiant d'un projecteur dont les canaux comptent comme libres
+        (modification d'un projecteur existant).
+        """
+        taken = sorted((f.address, f.end) for f in self.fixtures if f.id != ignore)
+        start = 1
+        for first, last in taken:
+            if start + size - 1 < first:
+                break
+            start = max(start, last + 1)
+        return start if start + size - 1 <= UNIVERSE_SIZE else None
+
+    def to_spec(self) -> List[dict]:
+        """Forme enregistrée dans ``fixtures.json``."""
+        return [{"id": f.id, "name": f.name, "profile": f.profile_key, "mode": f.mode_name,
+                 "address": f.address} for f in self.fixtures]
 
     def channel_count(self) -> int:
         """Nombre de canaux à émettre (dernier canal utilisé)."""

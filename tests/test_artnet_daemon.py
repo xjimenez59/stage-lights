@@ -51,6 +51,29 @@ class DaemonTests(unittest.TestCase):
         st.blackout()
         self.assertEqual(st.snapshot(), bytes(4))
 
+    def test_auto_state_follows_packet_length(self):
+        st = daemon.DmxState(2, auto=True)
+        st.update(bytes([1, 2, 3, 4, 5, 6]))
+        self.assertEqual(st.snapshot(), bytes([1, 2, 3, 4, 5, 6]))  # grandit
+        st.update(bytes([9, 9, 9, 9]))
+        self.assertEqual(st.snapshot(), bytes([9, 9, 9, 9]))  # rétrécit (un projecteur retiré du plan)
+        st.update(bytes(range(256)) * 3)
+        self.assertEqual(len(st.snapshot()), 512)  # plafonné à l'univers DMX
+
+    def test_fixed_state_does_not_resize(self):
+        st = daemon.DmxState(4)
+        st.update(bytes(10))
+        self.assertEqual(len(st.snapshot()), 4)
+
+    def test_auto_mode_in_main_uses_test_pattern_size(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "frames.bin")
+            threading.Timer(0.3, lambda: os.kill(os.getpid(), 2)).start()
+            self.assertEqual(daemon.main(["--dry-run", out, "--rate", "50", "--test-pattern"]), 0)
+            with open(out, "rb") as f:
+                self.assertGreater(len(f.read()), 0)
+
     def test_udp_to_frame(self):
         st = daemon.DmxState(8)
         rx = daemon.ArtnetReceiver(st, universe=3, bind="127.0.0.1", port=0)

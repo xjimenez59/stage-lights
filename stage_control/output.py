@@ -47,12 +47,19 @@ class OutputLoop(threading.Thread):
         self.engine = engine
         self.sender = sender
         self.period = 1.0 / rate_hz
-        # Nombre de canaux émis : jusqu'au dernier utilisé (2 au minimum : longueur paire Art-Net).
-        self.channels = channels if channels is not None else max(2, engine.plan.channel_count())
+        self._fixed_channels = channels
         self._clock = clock
         self._halt = threading.Event()
         self.sent = 0
         self.errors = 0
+
+    @property
+    def channels(self) -> int:
+        """Canaux émis : jusqu'au dernier utilisé par le plan de feu (qui peut changer à chaud),
+        2 au minimum (longueur paire Art-Net)."""
+        if self._fixed_channels is not None:
+            return self._fixed_channels
+        return max(2, self.engine.plan.channel_count())
 
     def tick(self) -> None:
         try:

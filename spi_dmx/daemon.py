@@ -26,14 +26,21 @@ log = logging.getLogger("spi_dmx")
 class DmxState:
     """Tampon DMX partagé entre le thread réseau et la boucle d'émission."""
 
-    def __init__(self, n_channels: int):
+    def __init__(self, n_channels: int, auto: bool = False):
         self.n = n_channels
+        self.auto = auto  # True : le nombre de canaux suit la longueur des paquets reçus
         self._buf = bytearray(n_channels)
         self._lock = threading.Lock()
         self.last_rx = 0.0  # time.monotonic() du dernier paquet utile
 
     def update(self, data: bytes, now: float | None = None) -> None:
         with self._lock:
+            if self.auto:
+                size = max(1, min(len(data), frame.MAX_CHANNELS))
+                if size != self.n:  # le plan de feu a changé : la trame suit
+                    log.info("nombre de canaux émis : %d -> %d", self.n, size)
+                    self.n = size
+                    self._buf = bytearray(size)
             chunk = data[: self.n]
             self._buf[: len(chunk)] = chunk
             self.last_rx = time.monotonic() if now is None else now
@@ -173,8 +180,9 @@ def run_output_loop(state: DmxState, sink, rate_hz: float, stop: threading.Event
 def parse_args(argv=None) -> argparse.Namespace:
     p = argparse.ArgumentParser(prog="spi_dmx", description=__doc__.split("\n")[0])
     p.add_argument("--universe", type=int, default=0, help="univers Art-Net écouté (défaut 0)")
-    p.add_argument("--channels", type=int, default=512,
-                   help="nombre de canaux émis, 1..512 (défaut 512 ; 32 suffit pour 4x8 canaux)")
+    p.add_argument("--channels", type=int, default=0,
+                   help="nombre de canaux émis, 1..512 ; 0 (défaut) = automatique : le nombre de canaux "
+                        "du dernier paquet Art-Net reçu (le contrôleur envoie jusqu'au dernier canal utilisé)")
     p.add_argument("--rate", type=float, default=40.0, help="trames/s (défaut 40)")
     p.add_argument("--bind", default="0.0.0.0", help="adresse d'écoute UDP")
     p.add_argument("--port", type=int, default=artnet.ARTNET_PORT, help="port UDP (défaut 6454)")
@@ -201,11 +209,16 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(message)s")
-    if not 1 <= args.channels <= frame.MAX_CHANNELS:
-        log.error("--channels doit être entre 1 et 512")
+    if not 0 <= args.channels <= frame.MAX_CHANNELS:
+        log.error("--channels doit être entre 0 (automatique) et 512")
         return 2
+    auto = args.channels == 0
+    if auto and args.test_pattern:
+        args.channels, auto = 32, False  # le motif de test a besoin d'une taille fixe
+    if auto:
+        args.channels = 2  # taille initiale, avant le premier paquet (puis suit l'Art-Net reçu)
 
-    state = DmxState(args.channels)
+    state = DmxState(args.channels, auto=auto)
     if args.test_pattern:
         state.update(bytes((i * 8) & 0xFF for i in range(args.channels)))
 
@@ -234,9 +247,9 @@ def main(argv=None) -> int:
         receiver.start()
         log.info("écoute Art-Net %s:%d, univers %d", args.bind, receiver.port, args.universe)
 
-    log.info("émission DMX : %d canaux, %.1f trames/s, trame %d µs",
-             args.channels, args.rate,
-             frame.frame_duration_us(args.channels, args.break_bits, args.mab_bits, args.idle_bytes))
+    log.info("émission DMX : %s, %.1f trames/s, trame %d µs",
+             "canaux automatiques (suivent l'Art-Net reçu)" if auto else f"{args.channels} canaux",
+             args.rate, frame.frame_duration_us(args.channels, args.break_bits, args.mab_bits, args.idle_bytes))
     try:
         n = run_output_loop(state, sink, args.rate, stop, args.timeout, args.idle_bytes,
                             args.break_bits, args.mab_bits)
