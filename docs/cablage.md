@@ -23,7 +23,9 @@ Si les projecteurs ne réagissent pas : inverser les broches 2 et 3.
 
 **Genre des connecteurs** : l'embase du boîtier est **femelle** (sortie DMX source), l'entrée des projecteurs est mâle. Le câble DMX est donc mâle d'un côté (vers le boîtier) et femelle de l'autre (vers le premier projecteur) ; chaque projecteur se chaîne ensuite : sortie femelle vers entrée mâle du suivant.
 
-Chaîne : sortie XLR femelle du boîtier → câble DMX (110 Ω) → entrée XLR mâle du 1er projecteur → sortie femelle → entrée du suivant… Terminaison de 120 Ω entre D+ et D− à la sortie du dernier projecteur si nécessaire.
+Chaîne : sortie XLR femelle du boîtier → câble DMX → entrée XLR mâle du 1er projecteur → sortie femelle → entrée du suivant… Terminaison de 120 Ω entre D+ et D− à la sortie du dernier projecteur si nécessaire.
+
+**Câble** : un câble DMX (impédance d'environ 110 Ω, paire torsadée blindée) est préférable. Un câble micro XLR de qualité (audio, impédance différente, **à vérifier selon le modèle**) convient très probablement pour quelques mètres et 4 projecteurs ; en cas de scintillement ou de projecteurs qui décrochent en fin de chaîne, changer pour un câble DMX avant de chercher ailleurs.
 
 ## Réseau
 
