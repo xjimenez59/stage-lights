@@ -21,6 +21,8 @@
 
 ### Architecture
 
+> **Dépassé (QLC+ abandonné le 2026-10-26)** : la partie logicielle (QLC+, console virtuelle, port 9999) est remplacée par le contrôleur maison `stage_control` ; l'architecture à jour est dans `CLAUDE.md`. Le routeur, le RS485 et le DMX restent valables.
+
 ```
 Secteur → alimentation(s)
    ├─ Routeur/AP WiFi (DHCP) ── Ethernet ──┬─ XR18
@@ -39,7 +41,7 @@ Tablette Android ── WiFi ── Mixing Station (XR18) + navigateur (console 
 | Routeur / AP | **GL.iNet Opal GL-SFT1200** (WiFi AC1200, 2,4 + 5 GHz, ~41 € sur Amazon.fr) | Le XR18 n'a pas de serveur DHCP : il faut un vrai routeur. Voir §2 ter. **Pas encore commandé.** |
 | Switch | **Probablement inutile** (~10 € seulement si besoin) | L'Opal a 3 ports gigabit (1 WAN + 2 LAN) et son port WAN peut être converti en LAN (§2 ter) : XR18 + Pi + port de service. Switch seulement pour plus d'appareils filaires. |
 | Cerveau lumière | Raspberry Pi 2 B, Raspberry Pi OS Lite **32 bits** | Sans écran, démarrage automatique. |
-| Logiciel lumière | **QLC+** avec interface web (`-w`, port 9999 par défaut) | Console virtuelle utilisable depuis le navigateur de la tablette. |
+| Logiciel lumière | ~~**QLC+**~~ (abandonné, remplacé par `stage_control`) avec interface web (`-w`, port 9999 par défaut) | Console virtuelle utilisable depuis le navigateur de la tablette. |
 | Pont DMX (première tentative) | **OLA** avec plugin `uartdmx` | QLC+ → plugin OLA → olad → UART. **Plugin OLA dans QLC+ à vérifier sur la version installée.** |
 | **Module RS485 isolé** | **Waveshare TTL To RS485 (C)** (14,99 € sur Amazon.fr) | Voir §2 bis. |
 | Sortie DMX | Module RS485 → embase **XLR 3 broches femelle** pour châssis | Une sortie DMX source est femelle (comme les interfaces USB-DMX du commerce). Quelques euros. |
@@ -50,6 +52,8 @@ Tablette Android ── WiFi ── Mixing Station (XR18) + navigateur (console 
 Routeur Opal ~41 € + module RS485 isolé ~15 € (soit environ 56 €) + XLR / connectique / alim 5 V / boîtier ; un switch (~10 €) seulement si besoin. Objectif : **moins de 100 €**. Ces deux articles commandés ensemble sur Amazon.fr dépassent le seuil de 45 € de livraison gratuite (hors Prime), s'ils sont tous deux expédiés par Amazon.
 
 ### Utilisation
+
+> **Dépassé** : ce scénario d'utilisation était celui de QLC+ ; voir `docs/specification-controleur.md`.
 
 1. Préparer le projet QLC+ (projecteurs, scènes, console virtuelle) **sur un PC**, l'enregistrer en `.qxw`, le copier sur le Pi.
 2. Sur scène : la tablette se connecte au WiFi du boîtier, Mixing Station pilote la XR18, le navigateur ouvre `http://<ip-du-pi>:9999` pour la console virtuelle QLC+.
@@ -144,6 +148,8 @@ device = /dev/ttyAMA0        # ou /dev/serial0 selon l'image ; à confirmer sur 
 
 ### QLC+ en mode sans écran
 
+> **Abandonné** : QLC+ n'est plus utilisé ; section conservée pour l'historique.
+
 - Option `-w` / `--web` pour activer l'interface web ; `-wp <port>` pour changer le port ; `-wa` pour l'authentification.
 - Selon la version, il peut être nécessaire d'ajouter `-n` et la variable `QT_QPA_PLATFORM=offscreen` **(à vérifier)**.
 - Le plugin OLA de QLC+ est en sortie seule. Vérifier que le paquet installé inclut ce plugin.
@@ -193,6 +199,8 @@ Un HAT comme le **Waveshare 2-CH RS485 HAT** (overlay `sc16is752-spi1`, ports `/
 
 ## 4. Points ouverts
 
+> Les points qui parlent de QLC+ (3 et 6) sont **sans objet** depuis l'abandon de QLC+ ; la liste à jour est dans `CLAUDE.md` et `docs/plan-de-tests.md`.
+
 1. **Stabilité du timing DMX** sous charge (scintillements). Test de charge repoussé à plus tard. Ordre prévu : UART + OLA d'abord, puis SPI natif si besoin, puis Pico/dmxsun ou adaptateur « Pro ».
 2. **Module RS485** : confirmer sur la fiche Waveshare le débit maximal et le sens automatique ; tester le comportement au break.
 3. **Plugin OLA dans QLC+** : présent ou non dans le paquet installé ?
@@ -218,6 +226,8 @@ Un HAT comme le **Waveshare 2-CH RS485 HAT** (overlay `sc16is752-spi1`, ports `/
 
 ## 6. Comment m'aider sur ce projet
 
+> **Dépassé** : les consignes actuelles sont dans `CLAUDE.md`.
+
 - Répondre en **français**, de façon concise.
 - Pour les éléments marqués « à vérifier », proposer d'abord de vérifier (documentation, test) plutôt que d'affirmer.
 - Respecter les contraintes : budget < 100 €, pas d'AliExpress, Pi 2 B, 1 univers DMX, tablette Android, QLC+ en interface web.
@@ -229,6 +239,8 @@ Un HAT comme le **Waveshare 2-CH RS485 HAT** (overlay `sc16is752-spi1`, ports `/
   - procédure de test de charge.
 
 ## 7. Sources consultées
+
+> Les liens QLC+ ci-dessous ne sont conservés que pour l'historique.
 
 - QLC+, interface web : https://docs.qlcplus.org/v5/advanced/web-interface
 - QLC+, matériel compatible : https://mail.qlcplus.org/discover/compatibility
