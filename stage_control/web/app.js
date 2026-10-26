@@ -156,7 +156,18 @@ function renderTabs() {
 
 document.getElementById("blackout").addEventListener("click", () => call("POST", "/api/blackout"));
 
+function paintPedalboard() {
+  const el = document.getElementById("ped");
+  const p = S.pedalboard;
+  el.hidden = !p || !p.enabled;
+  if (el.hidden) return;
+  el.classList.toggle("ok", p.connected);
+  el.textContent = p.connected ? "Pédalier" : "Pédalier absent";
+  el.title = p.connected ? `pédalier connecté (${p.port}, version ${p.version})` : "pédalier non connecté : recherche en cours";
+}
+
 function paintStatus() {
+  paintPedalboard();
   const st = S.status;
   if (!st) return;
   const bo = document.getElementById("blackout");
@@ -1006,6 +1017,7 @@ function connect() {
     S.status = JSON.parse(e.data);
     paintStatus();
   });
+  es.addEventListener("pedalboard", (e) => { S.pedalboard = JSON.parse(e.data); paintPedalboard(); });
   es.addEventListener("config", () => loadState());
   es.onopen = () => { dot.classList.add("ok"); loadState(); };
   es.onerror = () => dot.classList.remove("ok");

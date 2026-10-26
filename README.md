@@ -6,9 +6,11 @@ Boîtier de scène pour Raspberry Pi 2 B : contrôleur d'éclairage maison (scè
 - Spécification du contrôleur : [docs/specification-controleur.md](docs/specification-controleur.md)
 - Étude matérielle (historique, avant l'abandon de QLC+) : [docs/etude-conception.md](docs/etude-conception.md)
 - Câblage : [docs/cablage.md](docs/cablage.md) ; tests sur matériel : [docs/plan-de-tests.md](docs/plan-de-tests.md)
+- **Pédalier** (sous-projet matériel, séparé du contrôleur) : [docs/pedalier/](docs/pedalier/README.md)
 
 ## État
 
+### Contrôleur (Pi : DMX, scènes, interface web)
 | Brique | État |
 |---|---|
 | `spi_dmx` : démon Art-Net → SPI0 → DMX512 | écrit, testé hors matériel |
@@ -17,8 +19,14 @@ Boîtier de scène pour Raspberry Pi 2 B : contrôleur d'éclairage maison (scè
 | `stage_control` : émetteur Art-Net vers `spi_dmx` | écrit, testé de bout en bout en local |
 | `stage_control` : persistance JSON (plan, scènes, séquences, réglages) | écrit, testé |
 | `stage_control` : contrôleur (commandes, pédales, édition) et serveur HTTP + SSE | écrit, testé (`python3 -m stage_control --data DIR`) |
-| Interface web tactile (`stage_control/web/` : scènes, roue de couleur, plan de feu, séquences, réglages, pédalier simulé) | écrite, essayée dans Edge (pas sur la tablette) |
-| Pédalier (firmware XIAO ESP32S3 + module d'entrées) | à faire |
+| Interface web tactile (`stage_control/web/`) | écrite, essayée dans Edge (pas sur la tablette) |
+
+### Pédalier (boîtier au sol, voir [docs/pedalier/](docs/pedalier/README.md))
+| Brique | État |
+|---|---|
+| Liaison série côté Pi (`stage_control/pedalboard.py`), protocole, simulateur | écrit, testé avec un faux pédalier |
+| Firmware XIAO ESP32S3 (`firmware/pedalboard/`) | écrit, **non compilé ni essayé** |
+| Câblage, boîtier | schéma fait ; composants commandés, **à construire** |
 
 **Rien n'est validé sur le Pi, sur un analyseur logique ni sur les projecteurs** : voir les points à vérifier dans `CLAUDE.md` et le plan de tests.
 
@@ -56,7 +64,8 @@ Essai matériel : `python3 -m spi_dmx --test-pattern --channels 32` puis analyse
 ```
 CLAUDE.md          contexte pour l'assistant
 spi_dmx/           démon Art-Net → SPI → DMX512
-stage_control/     contrôleur : profils, scènes, moteur, séquences, sortie Art-Net
+stage_control/     contrôleur : profils, scènes, moteur, séquences, sortie Art-Net, pédalier, interface web
+firmware/          pédalier : firmware (Arduino, XIAO ESP32S3)
 profiles/          profils de projecteurs (JSON)
 tools/             outils de test
 tests/             tests unitaires
@@ -64,4 +73,5 @@ config/            OLA, config.txt, cmdline.txt, data-example/ (données de dép
 scripts/           installation, déploiement, unités systemd
 network/           routeur, faux internet
 docs/              spécification, câblage, tests matériel, étude
+docs/pedalier/     pédalier : protocole, réalisation, schéma, choix des pédales
 ```

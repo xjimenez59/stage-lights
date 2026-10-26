@@ -7,7 +7,9 @@ Wants=spi-dmx.service
 Type=simple
 User=@USER@
 WorkingDirectory=@REPO@
-ExecStart=/usr/bin/python3 -m stage_control --data /var/lib/stage-lights --port 8080
+ExecStart=/usr/bin/python3 -m stage_control --data /var/lib/stage-lights --port 8080 --pedalboard auto
+# Accès au port série USB du pédalier (/dev/ttyACM*)
+SupplementaryGroups=dialout
 Restart=always
 RestartSec=2
 # SIGTERM : le contrôleur enregistre ses réglages et s'arrête proprement.

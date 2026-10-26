@@ -13,6 +13,7 @@ import threading
 
 from .controller import Controller, EventBus, Ticker
 from .output import ArtnetSender, OutputLoop
+from .pedalboard import PedalboardLink
 from .server import make_server
 from .store import Store
 
@@ -32,6 +33,9 @@ def parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--port", type=int, default=8080, help="port HTTP (défaut 8080)")
     p.add_argument("--dmx-host", default="127.0.0.1", help="hôte du démon spi_dmx (Art-Net)")
     p.add_argument("--dmx-port", type=int, default=6454, help="port Art-Net du démon spi_dmx")
+    p.add_argument("--pedalboard", default="", metavar="PORT",
+                   help="pédalier USB : « auto » (ports /dev/ttyACM*), un chemin (/dev/ttyACM0) ou tcp:hôte:port "
+                        "(simulateur) ; vide = pas de pédalier")
     p.add_argument("--no-output", action="store_true", help="ne rien envoyer en Art-Net (essai de l'interface)")
     p.add_argument("-v", "--verbose", action="store_true")
     return p.parse_args(argv)
@@ -67,6 +71,11 @@ def main(argv=None) -> int:
     for sig in (signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, stop)
 
+    link = None
+    if args.pedalboard:
+        link = PedalboardLink(controller, args.pedalboard)
+        link.start()
+        log.info("pédalier : recherche sur %s", args.pedalboard)
     ticker.start()
     if loop:
         loop.start()
@@ -76,6 +85,9 @@ def main(argv=None) -> int:
     try:
         server.serve_forever()
     finally:
+        if link:
+            link.stop()
+            link.join(2)
         if loop:
             loop.stop()
             loop.join(2)

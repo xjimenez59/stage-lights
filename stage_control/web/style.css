@@ -24,6 +24,10 @@ button { cursor: pointer; }
   padding: 8px 12px; background: var(--bg); border-bottom: 1px solid var(--line); }
 .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--danger); flex: none; }
 .dot.ok { background: var(--ok); }
+.pedind { font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
+.pedind::before { content: "●"; margin-right: 4px; color: var(--danger); }
+.pedind.ok::before { color: var(--ok); }
+.pedind[hidden] { display: none; }
 #tabs { display: flex; gap: 6px; flex: 1; overflow-x: auto; }
 #tabs button { min-height: 48px; padding: 0 16px; border: 0; border-radius: 12px;
   background: var(--panel); color: var(--muted); white-space: nowrap; }

@@ -41,6 +41,16 @@ Cocher au fur et à mesure et noter les mesures dans ce fichier.
 - [ ] Arrêt et redémarrage du service : la dernière scène est conservée, démarrage en blackout.
 - [ ] Mesure de la cadence réelle de la boucle d'émission (gigue) pendant l'usage de l'interface.
 
+## 5 bis. Pédalier
+- [ ] Compiler et téléverser `firmware/pedalboard` sur le XIAO ESP32S3 (`arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32S3:CDCOnBoot=cdc firmware/pedalboard`) ; vérifier que `Serial.setTxTimeoutMs` existe dans la version du cœur ESP32 utilisée.
+- [ ] Câblage de `docs/pedalier/realisation.md` : les 7 LED s'allument une à une (essai du 74HC595) ; sans liaison, elles clignotent toutes lentement.
+- [ ] Brancher au Pi : `ls /dev/ttyACM*` ; `journalctl -u stage-control` indique « pédalier connecté » ; l'interface affiche « Pédalier » en vert. Vérifier que l'ouverture du port ne redémarre pas la carte (DTR/RTS).
+- [ ] Chaque pédale : l'appui déclenche l'action choisie dans « Réglages » ; la LED de la scène suit ; pendant une séquence, seule la LED de la séquence est allumée.
+- [ ] Flash : maintenu = actif, relâché = rétabli ; débrancher le câble en maintenant : le flash se relâche tout seul.
+- [ ] Antirebond : appuyer vite et plusieurs fois sur chaque pédale, sans doublon ni appui manqué ; mesurer le délai pédale → lumière (cible : imperceptible).
+- [ ] Redémarrer le Pi, puis débrancher / rebrancher le pédalier : reconnexion automatique, LED à l'état réel.
+- [ ] Long câble ou boîtier au sol : pas de parasites (appuis fantômes) ; sinon blinder ou ajouter des condensateurs.
+
 ## 6. Endurance
 - [ ] 1 h de fonctionnement continu sans scintillement ni plantage ; relevés de température du Pi.
 - [ ] Coupure/reprise du secteur : tout redémarre seul ; durée de remise en service totale : ____ s.

@@ -111,14 +111,15 @@ Mise en page tactile, grandes cibles, sans aucune ressource externe (le boîtier
 
 ## 7. Pédalier maison (USB)
 
-- Carte : Seeed Studio XIAO ESP32S3 (déjà possédées ; USB natif **et** radio disponible pour un essai BLE ultérieur). Nombre de broches libres suffisant pour 7 boutons + 7 LED **à vérifier**. 7 boutons et 7 LED : emplacements 1 à 6, blackout.
-- Liaison **série USB** vers le Pi, protocole texte, une ligne par message, UTF-8, `\n` :
-  - pédalier → Pi : `BTN <n> <1|0>` (n = 1 à 7 ; 1 = appui, 0 = relâchement, nécessaire pour le flash ; 7 = blackout) ;
-  - Pi → pédalier : `LED <emplacement 0-6> <blackout 0/1>` (emplacement 0 = aucun) à chaque changement d'état, et à la connexion/reconnexion. La LED d'un emplacement « scène » ou « séquence » est allumée tant que cette scène est active / cette séquence en cours ; un emplacement « flash » est allumé pendant l'appui ; « étape suivante / précédente » ne s'allument pas. À préciser : `LED` devra porter un état par emplacement (masque de 6 bits) plutôt qu'un numéro unique ;
-  - `HELLO <version>` du pédalier à la connexion ; `PING`/`PONG` pour détecter une liaison morte.
-- Règles de LED : une seule LED de scène allumée (scène active) ; LED blackout allumée pendant le blackout ; la LED de la scène active reste allumée pendant le blackout.
-- Antirebond côté pédalier ; reconnexion automatique du Pi ; fonctionnement dégradé sans pédalier (interface web seule).
-- Le module d'entrées du contrôleur est une interface commune « entrée → action » (rappeler scène N, basculer blackout) partagée par l'interface web et le pédalier, pour permettre d'ajouter plus tard d'autres sources (BLE, MIDI, OSC).
+Protocole complet, câblage et liste de matériel : [pedalier/protocole.md](pedalier/protocole.md) (interface) et [pedalier/realisation.md](pedalier/realisation.md) (matériel).
+
+- Carte : Seeed Studio XIAO ESP32S3 (déjà possédées ; USB natif **et** radio disponible pour un essai BLE ultérieur). 7 pédales (6 emplacements + blackout) et 7 LED ; comme la carte n'a que 11 broches, les LED passent par un registre à décalage 74HC595 (3 broches). Brochage, gestion des broches de démarrage et firmware : **à vérifier sur le matériel**.
+- Liaison **série USB** (CDC) vers le Pi, protocole texte, une ligne par message :
+  - pédalier → Pi : `BTN <n> <1|0>` (n = 1 à 7 ; 1 = appui, 0 = relâchement, nécessaire pour le flash ; 7 = blackout), `HELLO <version> <nb de pédales>`, `PONG` ;
+  - Pi → pédalier : `WHO`, `PING` (toutes les 2 s), `LED <6 chiffres> <b>` : un chiffre 0/1 par emplacement puis la LED du blackout, par exemple `LED 010010 1`. Envoyé à chaque changement d'état et à chaque (re)connexion.
+- Règles de LED : un emplacement « scène » est allumé quand sa scène est active **et qu'aucune séquence ne tourne** ; « séquence » : pendant sa lecture ; « flash » : pendant l'appui ; « étape suivante / précédente » : jamais. La LED du blackout est allumée pendant le blackout, et la LED de la scène active reste allumée.
+- Robustesse : antirebond dans le firmware ; le Pi relance la liaison tout seul (câble débranché, pédalier redémarré, silence de plus de 6 s) ; **les pédales enfoncées sont relâchées quand la liaison tombe** (pas de flash bloqué) ; sans liaison de 5 s, les LED du pédalier clignotent ; l'interface web reste utilisable et indique « Pédalier absent ».
+- Un module d'entrées reste une interface « entrée → action » commune à l'interface web et au pédalier. Variante envisagée : des **pads MIDI à LED** (voir pedalier/protocole.md), à étudier quand un modèle sera choisi.
 
 ## 8. Persistance et robustesse
 

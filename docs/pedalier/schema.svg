@@ -1,0 +1,243 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="Segoe UI, Arial, sans-serif">
+<style>
+  .bg{fill:#fff} .box{fill:#f6f8fa;stroke:#24292f;stroke-width:2}
+  .w{stroke:#24292f;stroke-width:2;fill:none;stroke-linecap:round}
+  .sig{stroke:#0b63ce;stroke-width:2;fill:none} .p{stroke:#d1242f;stroke-width:2;fill:none}
+  .g{stroke:#24292f;stroke-width:2;fill:none} .s1{stroke:#0b63ce;stroke-width:2;fill:none}
+  .pin{stroke:#24292f;stroke-width:2} .c{fill:#fff;stroke:#24292f;stroke-width:2}
+  .j{fill:#0b63ce} .jp{fill:#d1242f} .jg{fill:#24292f}
+  .r{fill:#fff;stroke:#24292f;stroke-width:2} .d{fill:#fff;stroke:#24292f;stroke-width:2}
+  .h{font-size:24px;font-weight:700;fill:#24292f} .b{font-size:15px;font-weight:700;fill:#24292f}
+  .t{font-size:14px;fill:#24292f} .s{font-size:12.5px;fill:#57606a} .pn{font-size:12.5px;fill:#24292f;font-family:Consolas,monospace}
+  .pw{font-size:12px;fill:#d1242f;font-weight:700} .gw{font-size:12px;fill:#24292f;font-weight:700}
+</style>
+<rect class="bg" x="0" y="0" width="1200" height="800"/>
+<text x="40" y="36" class="h" text-anchor="start">Pédalier de scène : schéma de câblage</text>
+<text x="40" y="58" class="s" text-anchor="start">XIAO ESP32S3 + 74HC595 (LED) · 7 pédales (contact fugitif) · liaison USB vers le Raspberry Pi</text>
+<rect x="250" y="90" width="200" height="560" rx="6" class="box"/>
+<text x="350" y="118" class="b" text-anchor="middle">XIAO ESP32S3</text>
+<text x="350" y="78" class="s" text-anchor="middle">USB-C vers Raspberry Pi (alimentation + liaison série)</text>
+<line x1="250" y1="140" x2="235" y2="140" class="pin"/>
+<text x="262" y="145" class="pn" text-anchor="start">D0</text>
+<line x1="250" y1="190" x2="235" y2="190" class="pin"/>
+<text x="262" y="195" class="pn" text-anchor="start">D1</text>
+<line x1="250" y1="240" x2="235" y2="240" class="pin"/>
+<text x="262" y="245" class="pn" text-anchor="start">D2</text>
+<line x1="250" y1="290" x2="235" y2="290" class="pin"/>
+<text x="262" y="295" class="pn" text-anchor="start">D3</text>
+<line x1="250" y1="340" x2="235" y2="340" class="pin"/>
+<text x="262" y="345" class="pn" text-anchor="start">D4</text>
+<line x1="250" y1="390" x2="235" y2="390" class="pin"/>
+<text x="262" y="395" class="pn" text-anchor="start">D5</text>
+<line x1="250" y1="440" x2="235" y2="440" class="pin"/>
+<text x="262" y="445" class="pn" text-anchor="start">D6</text>
+<line x1="450" y1="140" x2="465" y2="140" class="pin"/>
+<text x="438" y="145" class="pn" text-anchor="end">D8</text>
+<line x1="450" y1="190" x2="465" y2="190" class="pin"/>
+<text x="438" y="195" class="pn" text-anchor="end">D9</text>
+<line x1="450" y1="240" x2="465" y2="240" class="pin"/>
+<text x="438" y="245" class="pn" text-anchor="end">D10</text>
+<line x1="450" y1="330" x2="465" y2="330" class="pin"/>
+<text x="438" y="335" class="pn" text-anchor="end">3V3</text>
+<line x1="450" y1="470" x2="465" y2="470" class="pin"/>
+<text x="438" y="475" class="pn" text-anchor="end">GND</text>
+<text x="262" y="600" class="s" text-anchor="start">D7 : libre</text>
+<text x="262" y="618" class="s" text-anchor="start">(5V, GND, … : non utilisés)</text>
+<line x1="60" y1="140" x2="60" y2="500" class="g"/>
+<line x1="60" y1="140" x2="100" y2="140" class="g"/>
+<circle cx="60" cy="140" r="3.5" class="jg"/>
+<circle cx="100" cy="140" r="4" class="c"/><circle cx="150" cy="140" r="4" class="c"/>
+<line x1="100" y1="140" x2="146" y2="124" class="w"/>
+<line x1="154" y1="140" x2="235" y2="140" class="s1"/>
+<text x="100" y="118" class="b" text-anchor="start">S1</text>
+<text x="124" y="118" class="s" text-anchor="start">pédale 1</text>
+<line x1="60" y1="190" x2="100" y2="190" class="g"/>
+<circle cx="60" cy="190" r="3.5" class="jg"/>
+<circle cx="100" cy="190" r="4" class="c"/><circle cx="150" cy="190" r="4" class="c"/>
+<line x1="100" y1="190" x2="146" y2="174" class="w"/>
+<line x1="154" y1="190" x2="235" y2="190" class="s1"/>
+<text x="100" y="168" class="b" text-anchor="start">S2</text>
+<text x="124" y="168" class="s" text-anchor="start">pédale 2</text>
+<line x1="60" y1="240" x2="100" y2="240" class="g"/>
+<circle cx="60" cy="240" r="3.5" class="jg"/>
+<circle cx="100" cy="240" r="4" class="c"/><circle cx="150" cy="240" r="4" class="c"/>
+<line x1="100" y1="240" x2="146" y2="224" class="w"/>
+<line x1="154" y1="240" x2="235" y2="240" class="s1"/>
+<text x="100" y="218" class="b" text-anchor="start">S3</text>
+<text x="124" y="218" class="s" text-anchor="start">pédale 3</text>
+<line x1="60" y1="290" x2="100" y2="290" class="g"/>
+<circle cx="60" cy="290" r="3.5" class="jg"/>
+<circle cx="100" cy="290" r="4" class="c"/><circle cx="150" cy="290" r="4" class="c"/>
+<line x1="100" y1="290" x2="146" y2="274" class="w"/>
+<line x1="154" y1="290" x2="235" y2="290" class="s1"/>
+<text x="100" y="268" class="b" text-anchor="start">S4</text>
+<text x="124" y="268" class="s" text-anchor="start">pédale 4</text>
+<line x1="60" y1="340" x2="100" y2="340" class="g"/>
+<circle cx="60" cy="340" r="3.5" class="jg"/>
+<circle cx="100" cy="340" r="4" class="c"/><circle cx="150" cy="340" r="4" class="c"/>
+<line x1="100" y1="340" x2="146" y2="324" class="w"/>
+<line x1="154" y1="340" x2="235" y2="340" class="s1"/>
+<text x="100" y="318" class="b" text-anchor="start">S5</text>
+<text x="124" y="318" class="s" text-anchor="start">pédale 5</text>
+<line x1="60" y1="390" x2="100" y2="390" class="g"/>
+<circle cx="60" cy="390" r="3.5" class="jg"/>
+<circle cx="100" cy="390" r="4" class="c"/><circle cx="150" cy="390" r="4" class="c"/>
+<line x1="100" y1="390" x2="146" y2="374" class="w"/>
+<line x1="154" y1="390" x2="235" y2="390" class="s1"/>
+<text x="100" y="368" class="b" text-anchor="start">S6</text>
+<text x="124" y="368" class="s" text-anchor="start">pédale 6</text>
+<line x1="60" y1="440" x2="100" y2="440" class="g"/>
+<circle cx="60" cy="440" r="3.5" class="jg"/>
+<circle cx="100" cy="440" r="4" class="c"/><circle cx="150" cy="440" r="4" class="c"/>
+<line x1="100" y1="440" x2="146" y2="424" class="w"/>
+<line x1="154" y1="440" x2="235" y2="440" class="s1"/>
+<text x="100" y="418" class="b" text-anchor="start">S7</text>
+<text x="124" y="418" class="s" text-anchor="start">pédale 7 = BLACKOUT</text>
+<line x1="60" y1="500" x2="60" y2="520" class="g"/>
+<line x1="48" y1="520" x2="72" y2="520" class="g"/>
+<line x1="52" y1="526" x2="68" y2="526" class="g"/>
+<line x1="57" y1="532" x2="63" y2="532" class="g"/>
+<text x="80" y="530" class="s" text-anchor="start">GND commun des pédales</text>
+<rect x="620" y="110" width="150" height="500" rx="6" class="box"/>
+<text x="695" y="138" class="b" text-anchor="middle">74HC595</text>
+<line x1="620" y1="190" x2="605" y2="190" class="pin"/>
+<text x="630" y="195" class="pn" text-anchor="start">14 SER</text>
+<line x1="620" y1="240" x2="605" y2="240" class="pin"/>
+<text x="630" y="245" class="pn" text-anchor="start">11 SRCLK</text>
+<line x1="620" y1="290" x2="605" y2="290" class="pin"/>
+<text x="630" y="295" class="pn" text-anchor="start">12 RCLK</text>
+<line x1="620" y1="380" x2="605" y2="380" class="pin"/>
+<text x="630" y="385" class="pn" text-anchor="start">10 /SRCLR</text>
+<line x1="620" y1="430" x2="605" y2="430" class="pin"/>
+<text x="630" y="435" class="pn" text-anchor="start">16 VCC</text>
+<line x1="620" y1="520" x2="605" y2="520" class="pin"/>
+<text x="630" y="525" class="pn" text-anchor="start">13 /OE</text>
+<line x1="620" y1="570" x2="605" y2="570" class="pin"/>
+<text x="630" y="575" class="pn" text-anchor="start">8 GND</text>
+<line x1="770" y1="190" x2="785" y2="190" class="pin"/>
+<text x="760" y="195" class="pn" text-anchor="end">Q0 (15)</text>
+<line x1="770" y1="240" x2="785" y2="240" class="pin"/>
+<text x="760" y="245" class="pn" text-anchor="end">Q1 (1)</text>
+<line x1="770" y1="290" x2="785" y2="290" class="pin"/>
+<text x="760" y="295" class="pn" text-anchor="end">Q2 (2)</text>
+<line x1="770" y1="340" x2="785" y2="340" class="pin"/>
+<text x="760" y="345" class="pn" text-anchor="end">Q3 (3)</text>
+<line x1="770" y1="390" x2="785" y2="390" class="pin"/>
+<text x="760" y="395" class="pn" text-anchor="end">Q4 (4)</text>
+<line x1="770" y1="440" x2="785" y2="440" class="pin"/>
+<text x="760" y="445" class="pn" text-anchor="end">Q5 (5)</text>
+<line x1="770" y1="490" x2="785" y2="490" class="pin"/>
+<text x="760" y="495" class="pn" text-anchor="end">Q6 (6)</text>
+<line x1="770" y1="540" x2="785" y2="540" class="pin"/>
+<text x="760" y="545" class="pn" text-anchor="end">Q7 (7)</text>
+<text x="795" y="545" class="s" text-anchor="start">non utilisé</text>
+<line x1="770" y1="585" x2="785" y2="585" class="pin"/>
+<text x="760" y="590" class="pn" text-anchor="end">QH' (9)</text>
+<text x="795" y="590" class="s" text-anchor="start">non utilisé</text>
+<line x1="465" y1="140" x2="520" y2="140" class="sig"/>
+<line x1="520" y1="140" x2="520" y2="190" class="sig"/>
+<line x1="520" y1="190" x2="605" y2="190" class="sig"/>
+<line x1="465" y1="190" x2="520" y2="190" class="sig"/>
+<line x1="520" y1="190" x2="520" y2="240" class="sig"/>
+<line x1="520" y1="240" x2="605" y2="240" class="sig"/>
+<line x1="465" y1="240" x2="520" y2="240" class="sig"/>
+<line x1="520" y1="240" x2="520" y2="290" class="sig"/>
+<line x1="520" y1="290" x2="605" y2="290" class="sig"/>
+<text x="528" y="184" class="s" text-anchor="start">DS (données)</text>
+<text x="528" y="234" class="s" text-anchor="start">SHCP (horloge)</text>
+<text x="528" y="284" class="s" text-anchor="start">STCP (verrou)</text>
+<line x1="465" y1="330" x2="580" y2="330" class="p"/>
+<line x1="580" y1="330" x2="580" y2="380" class="p"/>
+<line x1="580" y1="380" x2="605" y2="380" class="p"/>
+<line x1="580" y1="380" x2="580" y2="430" class="p"/>
+<line x1="580" y1="430" x2="605" y2="430" class="p"/>
+<circle cx="580" cy="380" r="3.5" class="jp"/>
+<text x="470" y="322" class="pw" text-anchor="start">3,3 V</text>
+<line x1="465" y1="470" x2="580" y2="470" class="g"/>
+<line x1="580" y1="470" x2="580" y2="570" class="g"/>
+<line x1="580" y1="520" x2="605" y2="520" class="g"/>
+<line x1="580" y1="570" x2="605" y2="570" class="g"/>
+<circle cx="580" cy="520" r="3.5" class="jg"/>
+<text x="470" y="462" class="gw" text-anchor="start">GND</text>
+<line x1="540" y1="330" x2="540" y2="383" class="p"/>
+<circle cx="540" cy="330" r="3.5" class="jp"/>
+<line x1="528" y1="383" x2="552" y2="383" class="p"/>
+<line x1="528" y1="393" x2="552" y2="393" class="g"/>
+<line x1="540" y1="393" x2="540" y2="470" class="g"/>
+<circle cx="540" cy="470" r="3.5" class="jg"/>
+<text x="528" y="418" class="s" text-anchor="end">100 nF</text>
+<text x="528" y="432" class="s" text-anchor="end">(près du 595)</text>
+<line x1="1030" y1="190" x2="1030" y2="520" class="g"/>
+<line x1="785" y1="190" x2="830" y2="190" class="sig"/>
+<rect x="830" y="181" width="54" height="18" class="r"/>
+<text x="857" y="194" class="s" text-anchor="middle">330 Ω</text>
+<line x1="884" y1="190" x2="920" y2="190" class="sig"/>
+<polygon points="920,178 920,202 944,190" class="d"/>
+<line x1="944" y1="178" x2="944" y2="202" class="w"/>
+<line x1="944" y1="190" x2="1030" y2="190" class="g"/>
+<circle cx="1030" cy="190" r="3.5" class="jg"/>
+<text x="1042" y="195" class="s" text-anchor="start">LED 1</text>
+<line x1="785" y1="240" x2="830" y2="240" class="sig"/>
+<rect x="830" y="231" width="54" height="18" class="r"/>
+<text x="857" y="244" class="s" text-anchor="middle">330 Ω</text>
+<line x1="884" y1="240" x2="920" y2="240" class="sig"/>
+<polygon points="920,228 920,252 944,240" class="d"/>
+<line x1="944" y1="228" x2="944" y2="252" class="w"/>
+<line x1="944" y1="240" x2="1030" y2="240" class="g"/>
+<circle cx="1030" cy="240" r="3.5" class="jg"/>
+<text x="1042" y="245" class="s" text-anchor="start">LED 2</text>
+<line x1="785" y1="290" x2="830" y2="290" class="sig"/>
+<rect x="830" y="281" width="54" height="18" class="r"/>
+<text x="857" y="294" class="s" text-anchor="middle">330 Ω</text>
+<line x1="884" y1="290" x2="920" y2="290" class="sig"/>
+<polygon points="920,278 920,302 944,290" class="d"/>
+<line x1="944" y1="278" x2="944" y2="302" class="w"/>
+<line x1="944" y1="290" x2="1030" y2="290" class="g"/>
+<circle cx="1030" cy="290" r="3.5" class="jg"/>
+<text x="1042" y="295" class="s" text-anchor="start">LED 3</text>
+<line x1="785" y1="340" x2="830" y2="340" class="sig"/>
+<rect x="830" y="331" width="54" height="18" class="r"/>
+<text x="857" y="344" class="s" text-anchor="middle">330 Ω</text>
+<line x1="884" y1="340" x2="920" y2="340" class="sig"/>
+<polygon points="920,328 920,352 944,340" class="d"/>
+<line x1="944" y1="328" x2="944" y2="352" class="w"/>
+<line x1="944" y1="340" x2="1030" y2="340" class="g"/>
+<circle cx="1030" cy="340" r="3.5" class="jg"/>
+<text x="1042" y="345" class="s" text-anchor="start">LED 4</text>
+<line x1="785" y1="390" x2="830" y2="390" class="sig"/>
+<rect x="830" y="381" width="54" height="18" class="r"/>
+<text x="857" y="394" class="s" text-anchor="middle">330 Ω</text>
+<line x1="884" y1="390" x2="920" y2="390" class="sig"/>
+<polygon points="920,378 920,402 944,390" class="d"/>
+<line x1="944" y1="378" x2="944" y2="402" class="w"/>
+<line x1="944" y1="390" x2="1030" y2="390" class="g"/>
+<circle cx="1030" cy="390" r="3.5" class="jg"/>
+<text x="1042" y="395" class="s" text-anchor="start">LED 5</text>
+<line x1="785" y1="440" x2="830" y2="440" class="sig"/>
+<rect x="830" y="431" width="54" height="18" class="r"/>
+<text x="857" y="444" class="s" text-anchor="middle">330 Ω</text>
+<line x1="884" y1="440" x2="920" y2="440" class="sig"/>
+<polygon points="920,428 920,452 944,440" class="d"/>
+<line x1="944" y1="428" x2="944" y2="452" class="w"/>
+<line x1="944" y1="440" x2="1030" y2="440" class="g"/>
+<circle cx="1030" cy="440" r="3.5" class="jg"/>
+<text x="1042" y="445" class="s" text-anchor="start">LED 6</text>
+<line x1="785" y1="490" x2="830" y2="490" class="sig"/>
+<rect x="830" y="481" width="54" height="18" class="r"/>
+<text x="857" y="494" class="s" text-anchor="middle">330 Ω</text>
+<line x1="884" y1="490" x2="920" y2="490" class="sig"/>
+<polygon points="920,478 920,502 944,490" class="d"/>
+<line x1="944" y1="478" x2="944" y2="502" class="w"/>
+<line x1="944" y1="490" x2="1030" y2="490" class="g"/>
+<circle cx="1030" cy="490" r="3.5" class="jg"/>
+<text x="1042" y="495" class="s" text-anchor="start">LED 7 (blackout, rouge)</text>
+<line x1="1030" y1="520" x2="1030" y2="540" class="g"/>
+<line x1="1018" y1="540" x2="1042" y2="540" class="g"/>
+<line x1="1022" y1="546" x2="1038" y2="546" class="g"/>
+<line x1="1026" y1="552" x2="1034" y2="552" class="g"/>
+<text x="40" y="690" class="b" text-anchor="start">Notes</text>
+<text x="40" y="710" class="s" text-anchor="start">• Les pédales sont de simples contacts fugitifs (normalement ouverts) entre l'entrée Dn et la masse : la résistance de rappel est interne (INPUT_PULLUP).</text>
+<text x="40" y="730" class="s" text-anchor="start">• Sorties du 74HC595 sur 3,3 V : une LED rouge à 330 Ω consomme environ 4 mA ; 7 LED = environ 30 mA, sans problème pour l'USB.</text>
+<text x="40" y="750" class="s" text-anchor="start">• Option câble long ou pédales loin du boîtier : 220 Ω en série et 10 nF vers la masse sur chaque entrée, au plus près de la carte.</text>
+<text x="40" y="770" class="s" text-anchor="start">• À vérifier sur le matériel : D6 est la sortie série de démarrage (GPIO43), D2 est une broche de configuration (GPIO3) ; ne pas y mettre de rappel externe fort.</text>
+</svg>

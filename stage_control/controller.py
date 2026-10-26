@@ -80,6 +80,8 @@ class Controller:
         self.settings = settings
         self.profiles = store.load_profiles()  # modèles de projecteurs disponibles (par nom de fichier)
         self.bus = bus or EventBus()
+        # État de la liaison avec le pédalier (renseigné par PedalboardLink ; ``enabled`` : une liaison est configurée)
+        self.pedalboard = {"enabled": False, "connected": False, "port": None, "version": None}
         self.save_delay = save_delay
         self._clock = clock
         self._lock = threading.RLock()
@@ -141,6 +143,7 @@ class Controller:
                 "fixtures": [fixture_json(f) for f in plan.fixtures],
                 "profiles": self._profiles_json(plan),
                 "dmx": {"channels": plan.channel_count(), "size": UNIVERSE_SIZE},
+                "pedalboard": dict(self.pedalboard),
                 "scenes": [s.to_dict() for s in self.engine.scenes.values()],
                 "sequences": [s.to_dict() for s in self.engine.sequences.values()],
                 "settings": self.settings.to_dict(),
@@ -273,6 +276,14 @@ class Controller:
                                            for f in plan.fixtures]))
         self._changed()
         return report
+
+    def set_pedalboard(self, **info) -> None:
+        """Met à jour l'état de la liaison avec le pédalier et le diffuse à l'interface."""
+        with self._lock:
+            if all(self.pedalboard.get(k) == v for k, v in info.items()):
+                return
+            self.pedalboard.update(info)
+            self.bus.publish("pedalboard", dict(self.pedalboard))
 
     def _changed(self) -> None:
         self.bus.publish("config", {"t": time.time()})
