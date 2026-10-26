@@ -1,0 +1,16 @@
+[Unit]
+Description=Démon DMX512 via SPI (Art-Net local -> SPI0)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=@REPO@
+ExecStart=/usr/bin/python3 -m spi_dmx --universe 0 --channels 32 --rate 40 --bind 127.0.0.1
+Restart=always
+RestartSec=2
+Nice=-10
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=20
+
+[Install]
+WantedBy=multi-user.target

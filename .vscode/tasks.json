@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Tests",
+      "type": "shell",
+      "command": "python3 -m unittest discover -s tests -v",
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "Démon en essai (sans SPI)",
+      "type": "shell",
+      "command": "python3 -m spi_dmx --dry-run /tmp/frames.bin --channels 32 -v",
+      "isBackground": true
+    },
+    {
+      "label": "Déployer sur le Pi",
+      "type": "shell",
+      "command": "scripts/deploy.sh ${input:piTarget}"
+    }
+  ],
+  "inputs": [
+    { "id": "piTarget", "type": "promptString", "description": "utilisateur@hôte", "default": "pi@192.168.8.10" }
+  ]
+}

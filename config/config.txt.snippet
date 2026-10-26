@@ -1,0 +1,15 @@
+# À ajouter dans /boot/firmware/config.txt (bookworm) ou /boot/config.txt (bullseye)
+
+# Voie SPI (démon spi_dmx)
+dtparam=spi=on
+# Fixe la fréquence du cœur pour que 250 kHz soit un diviseur exact (à vérifier à l'analyseur logique)
+core_freq=250
+core_freq_min=250
+
+# Voie UART (OLA uartdmx) : le Pi 2 B n'a pas de Bluetooth, l'UART PL011 est déjà ttyAMA0
+enable_uart=1
+
+# Pas de WiFi ni de Bluetooth sur le Pi 2 B : rien à désactiver.
+# Économie d'énergie / démarrage rapide (optionnel)
+disable_splash=1
+boot_delay=0

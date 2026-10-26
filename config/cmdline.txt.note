@@ -1,0 +1,3 @@
+Voie UART uniquement : retirer de /boot/firmware/cmdline.txt  « console=serial0,115200 »
+(ou : raspi-config > Interface Options > Serial Port > console non, matériel oui).
+Désactiver aussi le service getty série : sudo systemctl disable --now serial-getty@ttyAMA0.service

@@ -1,0 +1,37 @@
+{
+  "name": "LED PARty Spot Silent RGB/WW",
+  "manufacturer": "Eurolite",
+  "source": "Notice (DE), fonctions des modes 4, 6 et 8 canaux. Les canaux non pilotés (stroboscope, programmes automatiques, vitesse) restent à 0 = « aucune fonction ».",
+  "modes": {
+    "4ch": {
+      "channels": [
+        {"role": "red"},
+        {"role": "green"},
+        {"role": "blue"},
+        {"role": "white"}
+      ]
+    },
+    "6ch": {
+      "channels": [
+        {"role": "red"},
+        {"role": "green"},
+        {"role": "blue"},
+        {"role": "white"},
+        {"role": "intensity"},
+        {"role": "strobe", "default": 0, "min": 11, "max": 255}
+      ]
+    },
+    "8ch": {
+      "channels": [
+        {"role": "red"},
+        {"role": "green"},
+        {"role": "blue"},
+        {"role": "white"},
+        {"role": "intensity"},
+        {"role": "strobe", "default": 0, "min": 10, "max": 255},
+        {"role": "macro", "default": 0},
+        {"role": "speed", "default": 0}
+      ]
+    }
+  }
+}
